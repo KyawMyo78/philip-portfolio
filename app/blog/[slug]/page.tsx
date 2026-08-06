@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { Calendar, Clock, ArrowLeft, Tag, Share2, Check } from 'lucide-react'
 import toast from 'react-hot-toast'
-import NavigationWithChat from '@/components/NavigationWithChat'
+import Navigation from '@/components/Navigation'
 import Footer from '@/components/Footer'
 
 interface BlogPost {
@@ -119,8 +119,8 @@ export default function BlogPostPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen">
-        <NavigationWithChat />
+      <main className="public-shell min-h-screen">
+        <Navigation />
         <div className="pt-32 pb-16">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center py-12">
@@ -136,8 +136,8 @@ export default function BlogPostPage() {
 
   if (notFound || !post) {
     return (
-      <main className="min-h-screen">
-        <NavigationWithChat />
+      <main className="public-shell min-h-screen">
+        <Navigation />
         <div className="pt-32 pb-16">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h1 className="text-4xl font-bold text-gray-900 mb-4">Article Not Found</h1>
@@ -157,8 +157,8 @@ export default function BlogPostPage() {
   }
 
   return (
-    <main className="min-h-screen">
-      <NavigationWithChat />
+    <main className="public-shell min-h-screen">
+      <Navigation />
       
       {/* Article Header */}
       <article className="pt-32 pb-16">

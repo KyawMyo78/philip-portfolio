@@ -182,7 +182,7 @@ export default function Projects() {
 
   if (isLoading) {
     return (
-      <section id="projects" className="section-padding" style={{ backgroundColor: '#fafafa' }}>
+      <section id="projects" className="public-section-shell section-padding">
         <div className="container-width">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -207,7 +207,7 @@ export default function Projects() {
 
   if (error) {
     return (
-      <section id="projects" className="section-padding" style={{ backgroundColor: '#fafafa' }}>
+      <section id="projects" className="public-section-shell section-padding">
         <div className="container-width">
           <ErrorState
             title="Failed to Load Projects"
@@ -221,7 +221,7 @@ export default function Projects() {
 
   if (projects.length === 0) {
     return (
-  <section id="projects" className="section-padding" style={{ backgroundColor: '#fafafa' }}>
+  <section id="projects" className="public-section-shell section-padding">
         <div className="container-width">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -249,7 +249,7 @@ export default function Projects() {
   }
 
   return (
-  <section id="projects" className="section-padding" style={{ backgroundColor: '#fafafa' }}>
+  <section id="projects" className="public-section-shell section-padding">
       <div className="container-width">
         {/* Section Header */}
         <motion.div
@@ -381,9 +381,9 @@ function ProjectCard({ project, featured, index, onProjectClick }: ProjectCardPr
   const [isExpanded, setIsExpanded] = useState(false);
 
   const statusColors = {
-    completed: 'bg-green-100 text-green-700',
-    'in-progress': 'bg-yellow-100 text-yellow-700',
-    planned: 'bg-primary-100 text-primary-700'
+    completed: 'bg-emerald-600 text-white shadow-sm',
+    'in-progress': 'bg-amber-600 text-white shadow-sm',
+    planned: 'bg-slate-900 text-white shadow-sm'
   };
 
   const handleCardClick = (e: React.MouseEvent) => {

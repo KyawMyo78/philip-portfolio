@@ -92,8 +92,6 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-import { ChatProvider } from '../components/PublicChatWrapper';
-
 export default function RootLayout({
   children,
 }: {
@@ -103,26 +101,27 @@ export default function RootLayout({
     <html lang="en" className="scroll-smooth overflow-x-hidden">
       <body className={`${inter.className} overflow-x-hidden`} suppressHydrationWarning>
         <PortfolioDataProvider>
-          <ChatProvider>
-            {children}
-          </ChatProvider>
+          {children}
         </PortfolioDataProvider>
         <Toaster 
           position="top-right"
           toastOptions={{
             duration: 4000,
             style: {
-              background: '#1e293b',
-              color: '#fff',
+              background: '#f8fafc',
+              color: '#0f172a',
+              border: '1px solid rgba(148, 163, 184, 0.20)',
             },
             success: {
               style: {
-                background: '#059669',
+                background: '#e2e8f0',
+                color: '#0f172a',
               },
             },
             error: {
               style: {
-                background: '#dc2626',
+                background: '#fee2e2',
+                color: '#991b1b',
               },
             },
           }}

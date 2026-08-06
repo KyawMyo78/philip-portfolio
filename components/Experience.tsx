@@ -142,19 +142,19 @@ export default function Experience() {
   };
 
   const ExperienceCard = ({ experience }: { experience: Experience }) => (
-    <>
+    <div className="text-slate-900 dark:text-slate-100">
       {/* Header */}
       <div className="mb-4">
         <div className="flex items-start justify-between mb-2">
-          <h3 className="text-xl font-bold text-gray-900">{experience.title}</h3>
+          <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100">{experience.title}</h3>
           {experience.current && (
-            <span className="px-3 py-1 bg-green-100 text-green-700 text-xs rounded-full font-medium">
+            <span className="px-3 py-1 rounded-full text-xs font-medium bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shadow-sm border border-slate-900/10 dark:border-slate-200/20">
               Current
             </span>
           )}
         </div>
         
-        <div className="flex flex-wrap items-center gap-4 text-gray-600 mb-3">
+        <div className="flex flex-wrap items-center gap-4 text-slate-600 dark:text-slate-300 mb-3">
                 <div className="flex items-center gap-2">
             <Building className="w-4 h-4" />
             {experience.companyUrl ? (
@@ -162,7 +162,7 @@ export default function Experience() {
                 href={experience.companyUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-clover-700 hover:text-clover-900 font-medium flex items-center gap-1 transition-colors"
+                className="text-slate-700 dark:text-slate-200 hover:text-slate-950 dark:hover:text-white font-medium flex items-center gap-1 transition-colors"
               >
                 {experience.company}
                 <ExternalLink className="w-3 h-3" />
@@ -184,7 +184,7 @@ export default function Experience() {
             <span className="whitespace-nowrap">
               {formatDate(experience.startDate)} - {experience.current ? 'Present' : (experience.endDate ? formatDate(experience.endDate) : 'Present')}
             </span>
-            <span className="text-sm text-gray-500 whitespace-nowrap">
+            <span className="text-sm text-slate-500 dark:text-slate-400 whitespace-nowrap">
               ({calculateDuration(experience.startDate, experience.current ? undefined : experience.endDate)})
             </span>
           </div>
@@ -192,16 +192,16 @@ export default function Experience() {
       </div>
 
       {/* Description */}
-      <p className="text-gray-700 mb-4 leading-relaxed text-justify">{experience.description}</p>
+      <p className="text-slate-700 dark:text-slate-300 mb-4 leading-relaxed text-justify">{experience.description}</p>
 
       {/* Responsibilities */}
       {experience.responsibilities && experience.responsibilities.length > 0 && (
         <div className="mb-4">
-          <h4 className="font-medium text-gray-900 mb-2">Key Responsibilities:</h4>
+          <h4 className="font-medium text-slate-900 dark:text-slate-100 mb-2">Key Responsibilities:</h4>
           <ul className="space-y-1">
             {experience.responsibilities.map((responsibility, i) => (
-                <li key={i} className="text-gray-600 flex items-start gap-2 text-sm">
-                <span className="text-clover-700 mt-1.5 w-1 h-1 bg-current rounded-full flex-shrink-0"></span>
+                <li key={i} className="text-slate-600 dark:text-slate-300 flex items-start gap-2 text-sm">
+                <span className="text-slate-500 dark:text-slate-400 mt-1.5 w-1 h-1 bg-current rounded-full flex-shrink-0"></span>
                 <span>{responsibility}</span>
               </li>
             ))}
@@ -212,11 +212,11 @@ export default function Experience() {
       {/* Achievements */}
       {experience.achievements && experience.achievements.length > 0 && (
         <div className="mb-4">
-          <h4 className="font-medium text-gray-900 mb-2">Key Achievements:</h4>
+          <h4 className="font-medium text-slate-900 dark:text-slate-100 mb-2">Key Achievements:</h4>
           <ul className="space-y-1">
             {experience.achievements.map((achievement, i) => (
-              <li key={i} className="text-gray-600 flex items-start gap-2 text-sm">
-                <span className="text-green-600 mt-1">✓</span>
+              <li key={i} className="text-slate-600 dark:text-slate-300 flex items-start gap-2 text-sm">
+                <span className="text-emerald-600 dark:text-emerald-400 mt-1">✓</span>
                 <span>{achievement}</span>
               </li>
             ))}
@@ -227,12 +227,12 @@ export default function Experience() {
       {/* Technologies */}
       {experience.technologies && experience.technologies.length > 0 && (
         <div>
-          <h4 className="font-medium text-gray-900 mb-2">Technologies Used:</h4>
+          <h4 className="font-medium text-slate-900 dark:text-slate-100 mb-2">Technologies Used:</h4>
           <div className="flex flex-wrap gap-2">
             {experience.technologies.map((tech, i) => (
               <span
                 key={i}
-                className="px-3 py-1 bg-clover-100 text-clover-700 rounded-full text-sm font-medium"
+                className="px-3 py-1 rounded-full text-sm font-medium bg-slate-200 text-slate-800 dark:bg-slate-800 dark:text-slate-200"
               >
                 {tech}
               </span>
@@ -240,12 +240,12 @@ export default function Experience() {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 
   if (isLoading) {
     return (
-      <section id="experience" className="section-padding" style={{ backgroundColor: '#fafafa' }}>
+      <section id="experience" className="public-section-shell section-padding">
         <div className="container-width">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -275,7 +275,7 @@ export default function Experience() {
 
   if (error) {
     return (
-      <section id="experience" className="section-padding" style={{ backgroundColor: '#fafafa' }}>
+      <section id="experience" className="public-section-shell section-padding">
         <div className="container-width">
           <ErrorState
             title="Failed to Load Experience"
@@ -294,7 +294,7 @@ export default function Experience() {
 
   if (experiences.length === 0) {
     return (
-      <section id="experience" className="section-padding" style={{ backgroundColor: '#fafafa' }}>
+      <section id="experience" className="public-section-shell section-padding">
         <div className="container-width">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -326,7 +326,7 @@ export default function Experience() {
   }
 
   return (
-    <section id="experience" className="section-padding" style={{ backgroundColor: '#fafafa' }}>
+    <section id="experience" className="public-section-shell section-padding">
       <div className="container-width">
         {/* Section Header */}
         <motion.div
@@ -372,7 +372,7 @@ export default function Experience() {
                       <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
                     )}
                   </div>
-                  <div className="flex-1 bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-gray-100">
+                  <div className="flex-1 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-slate-200/80 dark:border-slate-700/80 bg-slate-100/95 dark:bg-slate-900/80 text-slate-900 dark:text-slate-100">
                     <ExperienceCard experience={experience} />
                   </div>
                 </div>
@@ -391,7 +391,7 @@ export default function Experience() {
                   <div className={`flex-1 max-w-lg ${
                     index % 2 === 0 ? 'mr-16' : 'ml-16 xl:order-2'
                   }`}>
-                    <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-gray-100">
+                    <div className="rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-slate-200/80 dark:border-slate-700/80 bg-slate-100/95 dark:bg-slate-900/80 text-slate-900 dark:text-slate-100">
                       <ExperienceCard experience={experience} />
                     </div>
                   </div>
@@ -412,26 +412,26 @@ export default function Experience() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.4 }}
-         className="mt-16 bg-gradient-to-r from-clover-100 to-clover-100 rounded-3xl p-8"
+           className="mt-16 rounded-3xl p-8 border border-[var(--border)] bg-[var(--surface-strong)] shadow-[0_16px_48px_rgba(15,23,42,0.06)]"
         >
           <div className="grid md:grid-cols-3 gap-8 text-center">
             <div>
-              <h4 className="text-3xl font-bold text-clover-900 mb-2">
+                <h4 className="text-3xl font-bold text-[var(--foreground)] mb-2">
                 {experiences.length}
               </h4>
-              <p className="text-clover-700 font-medium">Professional Roles</p>
+                <p className="text-[var(--muted-foreground)] font-medium">Professional Roles</p>
             </div>
             <div>
-              <h4 className="text-3xl font-bold text-clover-900 mb-2">
+                <h4 className="text-3xl font-bold text-[var(--foreground)] mb-2">
                 {experiences.filter(exp => exp.current).length}
               </h4>
-              <p className="text-clover-700 font-medium">Current Positions</p>
+                <p className="text-[var(--muted-foreground)] font-medium">Current Positions</p>
             </div>
             <div>
-              <h4 className="text-3xl font-bold text-clover-900 mb-2">
+                <h4 className="text-3xl font-bold text-[var(--foreground)] mb-2">
                 {new Set(experiences.flatMap(exp => exp.technologies || [])).size}
               </h4>
-              <p className="text-clover-700 font-medium">Technologies Used</p>
+                <p className="text-[var(--muted-foreground)] font-medium">Technologies Used</p>
             </div>
           </div>
         </motion.div>

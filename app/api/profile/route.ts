@@ -1,20 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { initializeApp, getApps, cert } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
+import { adminDb } from '@/lib/firebase-admin';
 import { getCached, setCached, clearCached } from '@/lib/server-cache';
-
-// Initialize Firebase Admin SDK
-if (!getApps().length) {
-  initializeApp({
-    credential: cert({
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-    }),
-  });
-}
-
-const db = getFirestore();
+import { isUnauthorized, requireAdmin } from '@/lib/admin-auth';
 
 // Default profile data
 const defaultProfile = {
@@ -56,15 +43,13 @@ async function getProfile() {
     const cached = getCached(cacheKey);
     if (cached) return cached;
 
-    const docRef = db.collection('profile').doc('main');
+    const docRef = adminDb.collection('profile').doc('main');
     const doc = await docRef.get();
     if (doc.exists) {
       const data = doc.data();
       setCached(cacheKey, data, 10 * 1000);
       return data;
     } else {
-      // Create the default profile if it doesn't exist
-      await docRef.set(defaultProfile);
       setCached(cacheKey, defaultProfile, 10 * 1000);
       return defaultProfile;
     }
@@ -76,7 +61,7 @@ async function getProfile() {
 
 async function saveProfile(profileData: any) {
   try {
-    const docRef = db.collection('profile').doc('main');
+    const docRef = adminDb.collection('profile').doc('main');
     await docRef.set(profileData, { merge: true });
   // Clear cache so subsequent GET returns fresh data
   clearCached('profile:main');
@@ -104,6 +89,9 @@ export async function GET() {
 }
 
 export async function PUT(request: NextRequest) {
+  const session = requireAdmin(request);
+  if (isUnauthorized(session)) return session;
+
   try {
     const profileData = await request.json();
     

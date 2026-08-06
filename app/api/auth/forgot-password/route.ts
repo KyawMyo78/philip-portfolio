@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
 import crypto from 'crypto';
 import { adminDb } from '../../../../lib/firebase-admin';
+import { enforceRateLimit } from '@/lib/rate-limiter';
 
 // Store reset tokens in Firebase (you could also use a database)
 async function storeResetToken(email: string, token: string, expiresAt: Date) {
@@ -120,54 +121,23 @@ async function sendResetEmail(email: string, resetToken: string) {
 }
 
 export async function POST(request: NextRequest) {
-  try {
-  const { email, secondaryEmail } = await request.json();
+  const rateLimitResponse = enforceRateLimit(request, 'password-reset-request', { limit: 3, windowMs: 60 * 60 * 1000 });
+  if (rateLimitResponse) return rateLimitResponse;
 
-    // Basic validation: allow two flows:
-    // 1) Primary email supplied: must match ADMIN_EMAIL (regular forgot-password)
-    // 2) Primary omitted: allowed only if secondaryEmail matches DEV_EMAIL (emergency/dev flow)
+  try {
+  const { email } = await request.json();
 
     const adminEmail = process.env.ADMIN_EMAIL;
-    const devEmail = process.env.DEV_EMAIL;
 
-    if (!adminEmail) {
+    if (!adminEmail || typeof email !== 'string') {
       console.error('ADMIN_EMAIL is not set in environment');
       return NextResponse.json({ success: false, error: 'Server misconfiguration' }, { status: 500 });
     }
 
-    // If primary email is provided, it must match adminEmail
-    if (email) {
-      if (email !== adminEmail) {
-        return NextResponse.json({ success: false, error: 'Email not found' }, { status: 404 });
-      }
+    if (email.trim().toLowerCase() !== adminEmail.toLowerCase()) {
+      return NextResponse.json({ success: true, message: 'If the account exists, a reset email will be sent.' });
     }
-
-    // If primary not provided, require secondary to match DEV_EMAIL
-    if (!email) {
-      if (!secondaryEmail && !devEmail) {
-        return NextResponse.json({ success: false, error: 'Email is required' }, { status: 400 });
-      }
-      const finalSecondaryOnly = secondaryEmail || devEmail;
-      if (finalSecondaryOnly !== devEmail) {
-        // Reject attempts to request a reset to arbitrary addresses when primary is unknown
-        return NextResponse.json({ success: false, error: 'Unauthorized request' }, { status: 403 });
-      }
-    }
-
-    // Default secondary to developer email (if not provided)
-    const finalSecondary = secondaryEmail || devEmail;
-
-    // Build recipients explicitly:
-    // - If primary (admin) is provided -> send ONLY to admin email
-    // - If primary omitted -> send ONLY to developer email (emergency flow)
-    let recipients: string[] = [];
-    if (email) {
-      // Normal flow: send only to the typed primary email
-      recipients = [email];
-    } else {
-      // Emergency flow: send only to dev email
-      if (finalSecondary) recipients = [finalSecondary];
-    }
+    const recipients = [adminEmail];
 
     // Generate reset token
     const resetToken = crypto.randomBytes(32).toString('hex');
@@ -197,11 +167,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-  console.log('Password reset sent to:', recipients);
-
     return NextResponse.json({
       success: true,
-      message: 'Password reset email sent successfully',
+      message: 'If the account exists, a reset email will be sent.',
     });
 
   } catch (error) {

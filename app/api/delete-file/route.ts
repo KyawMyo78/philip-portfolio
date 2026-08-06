@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { getStorage } from 'firebase-admin/storage';
+import { isUnauthorized, requireAdmin } from '@/lib/admin-auth';
 
 // Initialize Firebase Admin SDK
 if (!getApps().length) {
@@ -18,6 +19,9 @@ const storage = getStorage();
 const bucketName = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET;
 
 export async function DELETE(request: NextRequest) {
+  const session = requireAdmin(request);
+  if (isUnauthorized(session)) return session;
+
   try {
     const { searchParams } = new URL(request.url);
     const storagePath = searchParams.get('path');

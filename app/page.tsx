@@ -2,27 +2,18 @@
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
 
-import NavigationWithChat from '@/components/NavigationWithChat'
+import Navigation from '@/components/Navigation'
 import Hero from '@/components/Hero'
 import IconScroller from '@/components/IconScroller'
-import SectionCTA from '@/components/SectionCTA'
+import About from '@/components/About'
+import Skills from '@/components/Skills'
+import Experience from '@/components/Experience'
+import Projects from '@/components/Projects'
+import BlogPreview from '@/components/BlogPreview'
+import Contact from '@/components/Contact'
 import Footer from '@/components/Footer'
-import { initializeApp, getApps, cert } from 'firebase-admin/app'
-import { getFirestore } from 'firebase-admin/firestore'
+import { adminDb } from '@/lib/firebase-admin'
 import { getCached, setCached } from '@/lib/server-cache'
-
-// Initialize Firebase Admin SDK for server-side fetches
-if (!getApps().length) {
-  initializeApp({
-    credential: cert({
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-    }),
-  });
-}
-
-const db = getFirestore();
 
 async function getProfileServer() {
   try {
@@ -30,7 +21,7 @@ async function getProfileServer() {
     const cached = getCached(cacheKey);
     if (cached) return cached;
 
-    const doc = await db.collection('profile').doc('main').get();
+    const doc = await adminDb.collection('profile').doc('main').get();
     if (doc.exists) {
       const data = doc.data();
       setCached(cacheKey, data, 10 * 1000);
@@ -48,7 +39,7 @@ async function getSiteSettingsServer() {
     const cached = getCached(cacheKey);
     if (cached) return cached;
 
-    const doc = await db.collection('siteSettings').doc('main').get();
+    const doc = await adminDb.collection('siteSettings').doc('main').get();
     if (doc.exists) {
       const data = doc.data();
       setCached(cacheKey, data, 30 * 1000);
@@ -67,11 +58,18 @@ export default async function HomePage() {
   ]);
 
   return (
-    <main className="min-h-screen">
-      <NavigationWithChat siteSettings={siteSettings} />
+    <main className="public-shell min-h-screen">
+      <Navigation siteSettings={siteSettings} />
       <Hero profile={profile} siteSettings={siteSettings} />
       <IconScroller profile={profile} siteSettings={siteSettings} />
-      <SectionCTA currentSection="home" siteSettings={siteSettings} />
+      <About profile={profile} />
+      <Skills />
+      <Experience />
+      <Projects />
+      {siteSettings?.blog?.visible !== false && (
+        <BlogPreview siteSettings={siteSettings} />
+      )}
+      <Contact />
       <Footer profile={profile} siteSettings={siteSettings} />
     </main>
   )

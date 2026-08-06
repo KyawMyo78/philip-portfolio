@@ -95,6 +95,15 @@ const getProficiency = (skill: Skill): number => {
   return skill.proficiency ?? levelToProficiency(skill.level);
 };
 
+// Admin edits skills with a 1–5 star rating. Preserve that exact rating when
+// present, while mapping legacy percentage/text values to the same scale.
+const getStarRating = (skill: Skill): number => {
+  if (typeof skill.level === 'number' && skill.level >= 1 && skill.level <= 5) {
+    return Math.round(skill.level);
+  }
+  return Math.min(5, Math.max(1, Math.round(getProficiency(skill) / 20)));
+};
+
 // Helper function to get years of experience
 const getYearsOfExperience = (skill: Skill): number => {
   return skill.yearsOfExperience ?? 0;
@@ -212,7 +221,7 @@ export default function Skills() {
 
   if (isLoading) {
     return (
-      <section id="skills" className="section-padding">
+      <section id="skills" className="public-section-shell section-padding">
         <div className="container-width">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -237,7 +246,7 @@ export default function Skills() {
 
   if (error) {
     return (
-      <section id="skills" className="section-padding">
+      <section id="skills" className="public-section-shell section-padding">
         <div className="container-width">
           <ErrorState
             title="Failed to Load Skills"
@@ -251,7 +260,7 @@ export default function Skills() {
 
   if (skills.length === 0) {
     return (
-      <section id="skills" className="section-padding">
+      <section id="skills" className="public-section-shell section-padding">
         <div className="container-width">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -279,7 +288,7 @@ export default function Skills() {
   }
 
   return (
-    <section id="skills" className="section-padding">
+    <section id="skills" className="public-section-shell section-padding">
       <div className="container-width">
         {/* Section Header */}
         <motion.div
@@ -351,7 +360,19 @@ export default function Skills() {
                           )}
                         </div>
                         <div className="flex items-center text-sm text-gray-600">
-                          <span className="font-medium">{getProficiency(skill)}%</span>
+                          <div
+                            className="flex items-center gap-0.5"
+                            role="img"
+                            aria-label={`${getStarRating(skill)} out of 5 stars`}
+                          >
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <Star
+                                key={star}
+                                className={`h-4 w-4 ${star <= getStarRating(skill) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+                              />
+                            ))}
+                            <span className="sr-only">{getStarRating(skill)} out of 5 stars</span>
+                          </div>
                           {getYearsOfExperience(skill) > 0 && (
                             <span className="ml-2 text-xs">
                               {getYearsOfExperience(skill)}yr{getYearsOfExperience(skill) !== 1 ? 's' : ''}
@@ -360,19 +381,6 @@ export default function Skills() {
                         </div>
                       </div>
                       
-                      {/* Progress Bar */}
-                      <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          whileInView={{ width: `${getProficiency(skill)}%` }}
-                          viewport={{ once: true }}
-                          transition={{ duration: 1, delay: (categoryIndex * 0.1) + (skillIndex * 0.05) + 0.2 }}
-                          className={`h-full bg-gradient-to-r ${colorClass} rounded-full relative`}
-                        >
-                          <div className="absolute inset-0 bg-white/20 animate-pulse rounded-full"></div>
-                        </motion.div>
-                      </div>
-
                       {/* Description */}
                       {skill.description && (
                         <p className="text-xs text-gray-500 mt-1">{skill.description}</p>
@@ -391,7 +399,7 @@ export default function Skills() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.4 }}
-          className="mt-16 bg-gradient-to-r from-clover-100 to-clover-100 rounded-3xl p-8"
+          className="skills-summary-card mt-16 rounded-3xl p-8"
         >
           <div className="grid md:grid-cols-3 gap-8 text-center">
             <div>
