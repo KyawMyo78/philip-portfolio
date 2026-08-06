@@ -26,9 +26,7 @@ export default function IconScroller({ profile }: IconScrollerProps) {
   const marqueeDurationSec = Math.max(8, items.length * 4); // scale duration with number of items
 
   return (
-    <div
-      className="w-full flex justify-center pt-0 pb-6 bg-clover-100"
-    >
+    <div className="w-full flex justify-center pt-0 pb-6 bg-transparent">
       <div className="scroller-viewport">
         <div
           className="scroller-track"
@@ -74,9 +72,8 @@ export default function IconScroller({ profile }: IconScrollerProps) {
           gap: 36px; /* consistent spacing between items */
           transform: translate3d(0,0,0);
           will-change: transform;
-          /* continuous leftward scroll; duration controlled by --marquee-duration */
-          animation: marquee var(--marquee-duration, 12s) linear infinite;
-          animation-timing-function: linear; /* enforce constant speed */
+          /* marquee disabled to keep icons static on hero */
+          animation: none;
         }
 
         /* each item size; adjust to show roughly 3 icons in the viewport depending on gap */
@@ -97,10 +94,11 @@ export default function IconScroller({ profile }: IconScrollerProps) {
           justify-content: center;
           border-radius: 999px;
           /* subtle background to make icons pop */
-          background: rgba(16,185,129,0.08); /* clover tint */
+          background: rgba(255,255,255,0.06);
           backdrop-filter: blur(4px);
           transform-origin: center;
-          animation: orbit 4s ease-in-out infinite;
+          /* orbit motion disabled to keep icons static */
+          animation: none;
         }
 
         .icon {

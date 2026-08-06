@@ -1,20 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { initializeApp, getApps, cert } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
+import { adminDb } from '@/lib/firebase-admin';
 import { getCached, setCached, clearCached } from '@/lib/server-cache';
-
-// Initialize Firebase Admin SDK
-if (!getApps().length) {
-  initializeApp({
-    credential: cert({
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-    }),
-  });
-}
-
-const db = getFirestore();
+import { isUnauthorized, requireAdmin } from '@/lib/admin-auth';
 
 // Default site settings
 const defaultSettings = {
@@ -86,17 +73,14 @@ async function getSettings() {
     const cacheKey = 'siteSettings:main';
     const cached = getCached(cacheKey);
     if (cached) return cached;
-    if (cached) return cached;
 
-    const docRef = db.collection('siteSettings').doc('main');
+    const docRef = adminDb.collection('siteSettings').doc('main');
     const doc = await docRef.get();
     if (doc.exists) {
       const data = doc.data();
       setCached(cacheKey, data, 30 * 1000);
       return data;
     } else {
-      // Create the default settings if they don't exist
-      await docRef.set(defaultSettings);
       setCached(cacheKey, defaultSettings, 30 * 1000);
       return defaultSettings;
     }
@@ -108,7 +92,7 @@ async function getSettings() {
 
 async function saveSettings(settings: any) {
   try {
-    const docRef = db.collection('siteSettings').doc('main');
+    const docRef = adminDb.collection('siteSettings').doc('main');
     await docRef.set(settings, { merge: true });
   // Clear cache so subsequent GET returns fresh data
   clearCached('siteSettings:main');
@@ -133,6 +117,9 @@ export async function GET() {
 }
 
 export async function PUT(request: NextRequest) {
+  const session = requireAdmin(request);
+  if (isUnauthorized(session)) return session;
+
   try {
     const settings = await request.json();
     const success = await saveSettings(settings);
@@ -147,11 +134,8 @@ export async function PUT(request: NextRequest) {
     }
   } catch (error) {
   console.error('PUT /api/site-settings error:', error);
-  // Include error message text for debugging (beware of leaking sensitive details in production)
-  const errAny: any = error;
-  const message = errAny?.message || String(errAny);
     return NextResponse.json(
-      { success: false, message: `Failed to save site settings: ${message}` },
+      { success: false, message: 'Failed to save site settings' },
       { status: 500 }
     );
   }

@@ -17,11 +17,9 @@ import {
   ChevronLeft,
   Settings,
   BookOpen,
-  MessageSquare,
   HelpCircle
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import FloatingAIButton, { FloatingButtonProvider, useFloatingButton } from '../../components/FloatingAIButton';
 
 function AdminLayoutContent({
   children,
@@ -38,7 +36,6 @@ function AdminLayoutContent({
   const router = useRouter();
   const pathname = usePathname();
   const pageCacheRef = useRef<Map<string, React.ReactNode>>(new Map());
-  const { isMinimized, reopenButton } = useFloatingButton();
 
   const navigationItems = [
     { id: 'overview', label: 'Dashboard', icon: Home, path: '/admin/dashboard' },
@@ -47,7 +44,6 @@ function AdminLayoutContent({
     { id: 'experience', label: 'Experience', icon: Briefcase, path: '/admin/experience' },
     { id: 'skills', label: 'Skills', icon: Code, path: '/admin/skills' },
     { id: 'blog', label: 'Blog', icon: BookOpen, path: '/admin/blog' },
-    { id: 'chat', label: 'AI Chat', icon: MessageSquare, path: '/admin/chat' },
     { id: 'contacts', label: 'Messages', icon: Mail, path: '/admin/contacts' },
     { id: 'achievements', label: 'Achievements', icon: Award, path: '/admin/achievements' },
     { id: 'user-manual', label: 'User Manual', icon: HelpCircle, path: '/admin/user-manual' },
@@ -274,27 +270,6 @@ function AdminLayoutContent({
                 >
                   <Icon size={20} />
                   <span className="font-medium">{item.label}</span>
-                  {isChatItem && isMinimized && (
-                    <div
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        reopenButton();
-                      }}
-                      className="ml-auto bg-primary-900 hover:bg-primary-800 rounded-full p-1 shadow-lg transition-all duration-200 hover:scale-110 cursor-pointer"
-                      aria-label="Reopen AI Chat Button"
-                      role="button"
-                    >
-                      <img
-                        src="/apclover.jpg"
-                        alt="AP's Clover"
-                        className="object-cover rounded-full"
-                        style={{
-                          width: 24,
-                          height: 24
-                        }}
-                      />
-                    </div>
-                  )}
                 </button>
               );
             })}
@@ -344,27 +319,6 @@ function AdminLayoutContent({
                       >
                         <Icon size={20} />
                         <span className="font-medium">{item.label}</span>
-                        {isChatItem && isMinimized && (
-                          <div
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              reopenButton();
-                            }}
-                            className="ml-auto bg-white rounded-full p-1 shadow-lg transition-all duration-200 hover:scale-110 cursor-pointer"
-                            aria-label="Reopen AI Chat Button"
-                            role="button"
-                          >
-                            <img
-                              src="/apclover.jpg"
-                              alt="AP's Clover"
-                              className="object-cover rounded-full"
-                              style={{
-                                width: 24,
-                                height: 24
-                              }}
-                            />
-                          </div>
-                        )}
                       </button>
                     );
                   })}
@@ -394,8 +348,6 @@ function AdminLayoutContent({
           </main>
         </div>
         
-        {/* Floating AI Assistant Button */}
-        <FloatingAIButton />
       </div>
     </div>
   );
@@ -407,8 +359,6 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <FloatingButtonProvider>
-      <AdminLayoutContent>{children}</AdminLayoutContent>
-    </FloatingButtonProvider>
+    <AdminLayoutContent>{children}</AdminLayoutContent>
   );
 }

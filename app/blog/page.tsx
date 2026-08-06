@@ -4,9 +4,8 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Calendar, Clock, ArrowRight } from 'lucide-react'
 import { motion } from 'framer-motion'
-import NavigationWithChat from '@/components/NavigationWithChat'
+import Navigation from '@/components/Navigation'
 import Footer from '@/components/Footer'
-import ClientSectionCTA from '@/components/ClientSectionCTA'
 import { getCachedData, CACHE_KEYS } from '@/hooks/useDataPrefetch'
 
 interface BlogPost {
@@ -107,10 +106,10 @@ export default function BlogPage() {
   }
 
   return (
-    <main className="min-h-screen">
-      <NavigationWithChat siteSettings={siteSettings} />
+    <main className="public-shell min-h-screen">
+      <Navigation siteSettings={siteSettings} />
       
-      <section id="blog" className="section-padding" style={{ backgroundColor: '#fafafa' }}>
+      <section id="blog" className="section-padding">
         <div className="container-width">
           {/* Section Header */}
           <motion.div
@@ -260,7 +259,6 @@ export default function BlogPage() {
         </div>
       </section>
 
-      <ClientSectionCTA currentSection="blog" />
 
       <Footer profile={profile} siteSettings={siteSettings} />
     </main>

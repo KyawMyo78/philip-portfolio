@@ -417,9 +417,9 @@ export default function Contact() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.4 }}
-              className="p-6 bg-gradient-to-r from-clover-100 to-clover-100 rounded-xl"
+              className="p-6 rounded-xl border border-[var(--border)] bg-[var(--surface-strong)] shadow-[0_12px_40px_rgba(15,23,42,0.06)]"
             >
-              <h4 className="font-bold text-clover-900 mb-4">Why Work With Me?</h4>
+              <h4 className="font-bold text-[var(--foreground)] mb-4">Why Work With Me?</h4>
               <div className="space-y-2">
                 {(siteSettings?.contact?.whyWorkWithMe && Array.isArray(siteSettings.contact.whyWorkWithMe) ? siteSettings.contact.whyWorkWithMe : [
                   'Dedicated to delivering high-quality solutions',
@@ -428,8 +428,8 @@ export default function Contact() {
                   'Passionate about turning ideas into reality'
                 ]).map((point: string, index: number) => (
                   <div key={index} className="flex items-start">
-                    <CheckCircle className="w-5 h-5 text-clover-700 mr-2 mt-0.5 flex-shrink-0" />
-                    <span className="text-clover-700">{point}</span>
+                    <CheckCircle className="w-5 h-5 text-[var(--foreground)] mr-2 mt-0.5 flex-shrink-0" />
+                    <span className="text-[var(--muted-foreground)]">{point}</span>
                   </div>
                 ))}
               </div>

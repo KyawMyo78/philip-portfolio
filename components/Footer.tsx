@@ -15,12 +15,12 @@ interface ProfileData {
 }
 
 const quickLinks = [
-  { name: 'About', path: '/about' },
-  { name: 'Skills', path: '/skills' },
-  { name: 'Experience', path: '/experience' },
-  { name: 'Projects', path: '/projects' },
-  { name: 'Blog', path: '/blog' },
-  { name: 'Contact', path: '/contact' }
+  { name: 'About', path: '#about' },
+  { name: 'Skills', path: '#skills' },
+  { name: 'Experience', path: '#experience' },
+  { name: 'Projects', path: '#projects' },
+  { name: 'Blog', path: '#blog' },
+  { name: 'Contact', path: '#contact' }
 ];
 
 export default function Footer({ profile: serverProfile, siteSettings: serverSettings }: { profile?: any; siteSettings?: any }) {
@@ -237,7 +237,7 @@ export default function Footer({ profile: serverProfile, siteSettings: serverSet
                           href={link.path}
                           onClick={(e) => {
                             e.preventDefault();
-                            router.push(link.path);
+                            handleNavClick(link.path);
                           }}
                           className="text-secondary-300 hover:text-white transition-colors"
                         >
