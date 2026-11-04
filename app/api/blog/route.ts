@@ -1,18 +1,9 @@
 import { NextResponse } from 'next/server'
-import { initializeApp, getApps, cert } from 'firebase-admin/app'
-import { getFirestore } from 'firebase-admin/firestore'
+import { adminDb } from '@/lib/firebase-admin'
 
-if (!getApps().length) {
-  initializeApp({
-    credential: cert({
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-    }),
-  });
-}
 
-const db = getFirestore();
+// shared, build-safe Firebase setup (lib/firebase-admin.ts)
+const db = adminDb;
 
 // Disable caching for this route
 export const dynamic = 'force-dynamic';
@@ -34,7 +25,7 @@ export async function GET() {
     }));
 
     // Sort by publishedAt or createdAt on the server side
-    posts.sort((a, b) => {
+    posts.sort((a: any, b: any) => {
       const dateA = a.publishedAt || a.createdAt;
       const dateB = b.publishedAt || b.createdAt;
       return new Date(dateB).getTime() - new Date(dateA).getTime();

@@ -2,23 +2,14 @@
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
 
-import { initializeApp, getApps, cert } from 'firebase-admin/app'
-import { getFirestore } from 'firebase-admin/firestore'
+import { adminDb } from '@/lib/firebase-admin'
 import { getCached, setCached } from '@/lib/server-cache'
 import Home from '@/components/home/Home'
 
 // Initialize Firebase Admin SDK for server-side fetches
-if (!getApps().length) {
-  initializeApp({
-    credential: cert({
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-    }),
-  });
-}
 
-const db = getFirestore();
+// shared, build-safe Firebase setup (lib/firebase-admin.ts)
+const db = adminDb;
 
 async function getProfileServer() {
   try {
@@ -63,7 +54,7 @@ async function getSkillsServer() {
     if (cached) return cached;
 
     const snapshot = await db.collection('skills').orderBy('order', 'asc').get();
-    const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const data = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
     setCached(cacheKey, data, 10 * 1000);
     return data;
   } catch (e) {
@@ -103,7 +94,7 @@ async function getProjectsServer() {
     if (cached) return cached;
 
     const snapshot = await db.collection('projects').orderBy('order', 'asc').get();
-    const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const data = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
     setCached(cacheKey, data, 10 * 1000);
     return data;
   } catch (e) {
@@ -119,7 +110,7 @@ async function getAchievementsServer() {
     if (cached) return cached;
 
     const snapshot = await db.collection('achievements').orderBy('date', 'desc').get();
-    const data = snapshot.docs.map(doc => ({ 
+    const data = snapshot.docs.map((doc: any) => ({ 
       id: doc.id, 
       ...doc.data(),
       date: doc.data().date?.toDate?.()?.toISOString() || doc.data().date,

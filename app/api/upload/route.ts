@@ -1,26 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { initializeApp, getApps, cert } from 'firebase-admin/app';
-import { getStorage } from 'firebase-admin/storage';
+import { adminStorage } from '@/lib/firebase-admin';
 import { randomUUID } from 'crypto';
 import { isUnauthorized, requireAdmin } from '@/lib/admin-auth';
 import { enforceRateLimit } from '@/lib/rate-limiter';
 
 // Initialize Firebase Admin SDK
-if (!getApps().length) {
-  const storageBucket = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET;
-  
-  initializeApp({
-    credential: cert({
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-    }),
-    storageBucket: storageBucket,
-  });
-}
 
 // Get storage instance
-const storage = getStorage();
+// shared, build-safe Firebase setup (lib/firebase-admin.ts)
+const storage = adminStorage;
 
 export async function POST(request: NextRequest) {
   const session = requireAdmin(request);
