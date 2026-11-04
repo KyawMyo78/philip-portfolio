@@ -50,7 +50,9 @@ export default function ChatUI({
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    // scroll only the message list, not the whole page
+    const box = messagesEndRef.current?.parentElement;
+    box?.scrollTo({ top: box.scrollHeight, behavior: "smooth" });
   }, [messages]);
 
   // Auto-resize textarea based on content

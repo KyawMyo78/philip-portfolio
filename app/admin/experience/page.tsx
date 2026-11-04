@@ -272,13 +272,13 @@ export default function ExperienceManagement() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              className="bg-white rounded-xl shadow-lg border border-gray-100 p-6"
+              className="bg-white rounded-xl shadow-lg border border-gray-100 p-4 sm:p-6"
             >
-              <div className="flex justify-between items-start mb-4">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
+              <div className="flex justify-between items-start gap-3 mb-4">
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2 mb-2">
                     <Briefcase className="text-primary-600" size={20} />
-                    <h3 className="text-xl font-semibold text-gray-900">{experience.title}</h3>
+                    <h3 className="text-lg sm:text-xl font-semibold text-gray-900 break-words">{experience.title}</h3>
                     {experience.current && (
                       <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded">
                         Current
@@ -286,7 +286,7 @@ export default function ExperienceManagement() {
                     )}
                   </div>
                   
-                  <div className="flex items-center gap-4 text-gray-600 mb-2">
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm sm:text-base text-gray-600 mb-2">
                     <div className="flex items-center gap-1">
                       <Building size={16} />
                       {experience.companyUrl ? (
@@ -321,15 +321,17 @@ export default function ExperienceManagement() {
                   </div>
                 </div>
                 
-                <div className="flex gap-2">
+                <div className="flex shrink-0 gap-3">
                   <button
                     onClick={() => openModal(experience)}
+                    aria-label="Edit"
                     className="text-primary-600 hover:text-primary-800"
                   >
                     <Edit3 size={16} />
                   </button>
                   <button
                     onClick={() => experience.id && handleDelete(experience.id)}
+                    aria-label="Delete"
                     className="text-red-600 hover:text-red-800"
                   >
                     <Trash2 size={16} />

@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import { Download, Mail, MapPin, Code2, Briefcase } from 'lucide-react';
 import Image from 'next/image';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { getSocialIcon, SocialLink } from '../lib/socialIcons';
 import ErrorState from './ErrorState';
 import useDataPrefetch from '@/hooks/useDataPrefetch';
@@ -81,71 +81,6 @@ export default function Hero({ profile: serverProfile, siteSettings: serverSetti
     fetchData();
   };
 
-  // Cursor-reactive motion: track normalized pointer and apply gentle offsets to firefly wrappers
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const cursorRef = useRef({ x: 0, y: 0, tx: 0, ty: 0 }); // x,y = current, tx,ty = target
-  const rafRef = useRef<number | null>(null);
-  const paramsRef = useRef<Array<{ amp: number; speed: number }>>([]);
-  const PARTICLE_COUNT = 60;
-
-  useEffect(() => {
-    // initialize per-firefly params (reduced count for performance)
-  paramsRef.current = Array.from({ length: PARTICLE_COUNT }).map(() => ({ amp: 8 + Math.random() * 22, speed: 0.05 + Math.random() * 0.06 }));
-
-    const onPointerMove = (e: PointerEvent) => {
-      const el = containerRef.current;
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
-      const nx = (e.clientX - rect.left) / rect.width; // 0..1
-      const ny = (e.clientY - rect.top) / rect.height; // 0..1
-      // center to -0.5..0.5
-      cursorRef.current.tx = (nx - 0.5) * 2;
-      cursorRef.current.ty = (ny - 0.5) * 2;
-    };
-
-    // Throttle updates to ~30fps to avoid jank
-    let lastTick = 0;
-    const tick = (now?: number) => {
-      const tNow = now || Date.now();
-      if (tNow - lastTick < 33) {
-        rafRef.current = requestAnimationFrame(tick);
-        return;
-      }
-      lastTick = tNow;
-      // lerp current towards target
-      cursorRef.current.x += (cursorRef.current.tx - cursorRef.current.x) * 0.12;
-      cursorRef.current.y += (cursorRef.current.ty - cursorRef.current.y) * 0.12;
-
-      const wrappers = containerRef.current?.querySelectorAll<HTMLElement>('[data-firefly-index]');
-      if (wrappers && wrappers.length) {
-        const cx = cursorRef.current.x;
-        const cy = cursorRef.current.y;
-        const t = Date.now() / 1000;
-        wrappers.forEach((w) => {
-          const i = Number(w.dataset.fireflyIndex || 0);
-          const p = paramsRef.current[i] || { amp: 12, speed: 0.06 };
-          // per-firefly modulation
-          const wobbleX = Math.sin(t * (0.5 + p.speed * 5) + i) * 2;
-          const wobbleY = Math.cos(t * (0.5 + p.speed * 4) + i) * 2;
-          const tx = cx * p.amp * (0.6 + ((i % 5) / 5)) + wobbleX;
-          const ty = cy * p.amp * (0.6 + ((i % 7) / 7)) + wobbleY;
-          // apply transform on wrapper so framer-motion inside can still animate x/y
-          w.style.transform = `translate3d(${tx}px, ${ty}px, 0)`;
-        });
-      }
-
-      rafRef.current = requestAnimationFrame(tick);
-    };
-
-    window.addEventListener('pointermove', onPointerMove);
-    rafRef.current = requestAnimationFrame(tick);
-
-    return () => {
-      window.removeEventListener('pointermove', onPointerMove);
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    };
-  }, []);
-
   const handleContactClick = () => {
     // Navigate to contact page since we're now using multi-page layout
     window.location.href = '/contact';
@@ -167,8 +102,8 @@ export default function Hero({ profile: serverProfile, siteSettings: serverSetti
 
   if (isLoading) {
     return (
-      <section id="home" className="min-h-screen flex items-center justify-center relative overflow-hidden bg-clover-100">
-        <div className="container-width text-center">
+      <section id="home" className="py-20 lg:py-32 relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="space-y-6">
             <div className="h-48 w-48 mx-auto bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-full animate-pulse" />
             <div className="h-12 w-96 max-w-full mx-auto bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg animate-pulse" />
@@ -182,8 +117,8 @@ export default function Hero({ profile: serverProfile, siteSettings: serverSetti
 
   if (error) {
     return (
-      <section id="home" className="min-h-screen flex items-center justify-center relative overflow-hidden bg-clover-100">
-        <div className="container-width">
+      <section id="home" className="py-20 lg:py-32 relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <ErrorState
             title="Failed to Load Profile"
             message={error}
@@ -195,87 +130,8 @@ export default function Hero({ profile: serverProfile, siteSettings: serverSetti
   }
 
   return (
-    <section id="home" className="min-h-screen flex items-center justify-center relative overflow-hidden bg-clover-100">
-      {/* Background Animation - firefly style */}
-      <div className="absolute inset-0 overflow-hidden">
-      <div className="absolute -inset-10 opacity-95 pointer-events-none z-0" ref={containerRef}>
-          {/* Cursor-reactive fireflies */}
-          {[...Array(PARTICLE_COUNT)].map((_, i) => {
-            // leaf-on-wind / firefly hybrid: smaller vertical range so they stay in the lower hero
-            const size = Math.floor(Math.random() * 20) + 14; // 14-34px leaves
-            const baseDuration = 18 + Math.random() * 18; // travel duration
-            // start across the whole hero section so particles can appear anywhere vertically
-            const startTop = 5 + Math.random() * 90; // 5% - 95%
-            // gentle upward drift (px) so they move up but remain in lower area
-            const verticalDrift = -20 - Math.random() * 40; // -20 .. -60 px
-            const flickerDelay = Math.random() * 2;
-            const baseOpacity = 0.45 + Math.random() * 0.45;
-            const baseScale = 0.6 + Math.random() * 0.8;
-
-            return (
-              <div
-                key={`leaf-${i}`}
-                data-firefly-index={i}
-                className="absolute"
-                // keep horizontal placement fairly wide, but vertical starts low
-                style={{ left: `${10 + Math.random() * 80}%`, top: `${startTop}%`, width: `${size}px`, height: `${size}px`, pointerEvents: 'none' }}
-              >
-                <motion.div
-                  key={i}
-                  className="absolute inset-0 flex items-center justify-center pointer-events-none"
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    fontSize: `${size}px`,
-                    lineHeight: 1,
-                    transformOrigin: 'center',
-                    color: 'rgba(7,89,60,0.98)',
-                    willChange: 'transform, opacity',
-                  }}
-                  aria-hidden="true"
-                  initial={{ y: 0, opacity: 0, scale: baseScale }}
-                  animate={{
-                    // vertical upward drift only (negative y moves up)
-                    y: [0, verticalDrift],
-                    // fade in, gently flicker, then fade out to 0 so reset isn't visually abrupt
-                    opacity: [0, baseOpacity, baseOpacity * 0.65, 0],
-                    // subtle scale pulse
-                    scale: [baseScale, baseScale * 1.08, baseScale * 0.94, baseScale],
-                  }}
-                  transition={{
-                    y: { duration: baseDuration * (0.95 + Math.random() * 0.1), repeat: Infinity, ease: 'easeOut', delay: 0 },
-                    // opacity lasts a shorter portion of the travel so particles fade faster
-                    opacity: { duration: Math.max(1.2, baseDuration * 0.22), repeat: Infinity, ease: 'easeOut', delay: flickerDelay },
-                    scale: { duration: Math.max(2, baseDuration * 0.15), repeat: Infinity, ease: 'easeInOut', delay: flickerDelay },
-                  }}
-                >
-                  {/* clover emoji particle */}
-                  <span
-                    aria-hidden="true"
-                    className="pointer-events-none select-none"
-                    style={{
-                      width: '60%',
-                      height: '60%',
-                      fontSize: 'inherit',
-                      lineHeight: 1,
-                      transform: 'translateZ(0)',
-                      filter: 'drop-shadow(0 6px 18px rgba(16,185,129,0.12))',
-                      textShadow: '0 4px 18px rgba(34,197,94,0.25), 0 1px 2px rgba(0,0,0,0.05)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    🍀
-                  </span>
-                </motion.div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-  <div className="container-width section-padding pb-6 relative z-10">
+    <section id="home" className="py-20 lg:py-32 relative">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Image first in DOM for stacking on small screens; moves to right on lg */}
           <motion.div

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { initializeApp, getApps, cert } from 'firebase-admin/app'
-import { getFirestore } from 'firebase-admin/firestore'
+import { getFirestore, FieldValue } from 'firebase-admin/firestore'
 
 if (!getApps().length) {
   initializeApp({
@@ -43,10 +43,8 @@ export async function PATCH(
       }
 
       // Update only the views field
-      await db.collection('blogPosts').doc(id).update({
-        views: body.views,
-        updatedAt: new Date()
-      });
+      // +1 on the server; the number the visitor sends is ignored so it can't be faked
+      await db.collection('blogPosts').doc(id).update({ views: FieldValue.increment(1) });
 
       return NextResponse.json({ success: true });
     }

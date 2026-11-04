@@ -1,27 +1,39 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { verifyAdminToken } from './lib/admin-token';
 
-export function middleware(request: NextRequest) {
-  // Check if it's an admin route (except login, forgot-password, and reset-password)
-  if (request.nextUrl.pathname.startsWith('/admin') && 
-      !request.nextUrl.pathname.startsWith('/admin/login') &&
-      !request.nextUrl.pathname.startsWith('/admin/forgot-password') &&
-      !request.nextUrl.pathname.startsWith('/admin/reset-password')) {
-    
-    // Check for auth token in cookies
-    const token = request.cookies.get('admin-token');
-    
-    if (!token) {
-      // Redirect to login if no token
-      return NextResponse.redirect(new URL('/admin/login', request.url));
-    }
-    
-    // In a real application, you would verify the JWT token here
-    // For now, we'll just check if it exists
+// API calls anyone may make (the public site, the contact form, login and password reset).
+// Everything else under /api needs a valid admin session.
+const PUBLIC_API: [string, RegExp][] = [
+  ['GET', /^\/api\/(site-settings|profile|og|blog|admin\/theme)$/],
+  ['GET', /^\/api\/portfolio(\/(skills|projects|experience|achievements)(\/[^/]+)?)?$/],
+  ['GET', /^\/api\/blog\/slug\/[^/]+$/],
+  ['PATCH', /^\/api\/blog\/[^/]+$/], // view counter only; the route ignores anything else
+  ['POST', /^\/api\/portfolio\/contacts$/], // contact form
+  ['POST', /^\/api\/auth(\/(forgot-password|reset-password|verify-reset-token))?$/],
+  ['DELETE', /^\/api\/auth$/], // logout
+  ['POST', /^\/api\/revalidate$/], // protected by its own REVALIDATE_SECRET
+];
+const PUBLIC_ADMIN_PAGES = ['/admin/login', '/admin/forgot-password', '/admin/reset-password'];
+
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  const method = request.method === 'HEAD' ? 'GET' : request.method;
+
+  if (pathname.startsWith('/api/')) {
+    if (method === 'OPTIONS' || PUBLIC_API.some(([m, re]) => m === method && re.test(pathname))) return NextResponse.next();
+    const ok = await verifyAdminToken(request.cookies.get('admin-token')?.value, process.env.NEXTAUTH_SECRET);
+    return ok ? NextResponse.next() : NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
   }
 
-  return NextResponse.next();
+  // admin pages: a real, unexpired, correctly signed session is required (not just any cookie)
+  if (PUBLIC_ADMIN_PAGES.some((p) => pathname.startsWith(p))) return NextResponse.next();
+  const ok = await verifyAdminToken(request.cookies.get('admin-token')?.value, process.env.NEXTAUTH_SECRET);
+  if (ok) return NextResponse.next();
+  const res = NextResponse.redirect(new URL('/admin/login', request.url));
+  res.cookies.delete('admin-token');
+  return res;
 }
 
 export const config = {
-  matcher: ['/admin/:path*']
+  matcher: ['/admin/:path*', '/api/:path*'],
 };

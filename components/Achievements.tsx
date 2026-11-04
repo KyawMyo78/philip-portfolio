@@ -16,14 +16,21 @@ interface Achievement {
   featured?: boolean;
 }
 
-export default function Achievements({ excludeFeatured = false }: { excludeFeatured?: boolean }) {
-  const [items, setItems] = useState<Achievement[]>([]);
-  const [loading, setLoading] = useState(true);
+type Props = { 
+  excludeFeatured?: boolean;
+  achievements?: Achievement[];
+};
+
+export default function Achievements({ excludeFeatured = false, achievements: serverAchievements }: Props) {
+  const [items, setItems] = useState<Achievement[]>(serverAchievements || []);
+  const [loading, setLoading] = useState(!serverAchievements);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchAchievements();
-  }, []);
+    if (!serverAchievements) {
+      fetchAchievements();
+    }
+  }, [serverAchievements]);
 
   const fetchAchievements = async () => {
     try {

@@ -9,9 +9,9 @@ import { Download, MapPin } from 'lucide-react';
 import IconPreview from './IconPreview';
 import Achievements from './Achievements';
 
-type Props = { profile?: any };
+type Props = { profile?: any; achievements?: any[] };
 
-export default function About({ profile }: Props) {
+export default function About({ profile, achievements }: Props) {
   const description = profile?.aboutDescription || profile?.description || 'Write a short about description in the admin panel.';
 
   const skills = profile?.skills || [
@@ -58,7 +58,7 @@ export default function About({ profile }: Props) {
                 </div>
               </div>
               {/* Achievements inserted under the main about description */}
-              <Achievements />
+              <Achievements achievements={achievements} />
             </motion.div>
           </div>
 

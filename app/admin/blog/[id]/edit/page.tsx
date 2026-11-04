@@ -8,7 +8,6 @@ import toast from 'react-hot-toast'
 import ConfirmDialog from '../../../../../components/ConfirmDialog'
 import RichTextEditor from '@/components/RichTextEditor'
 import FileUpload from '@/components/FileUpload'
-import { getAdminSecret } from '@/lib/admin-config'
 
 interface BlogFormData {
   title: string
@@ -60,7 +59,6 @@ export default function EditBlogPostPage() {
     try {
       const response = await fetch(`/api/admin/blog/${postId}`, {
         headers: {
-          'x-admin-secret': getAdminSecret()
         }
       })
       const result = await response.json()
@@ -134,8 +132,7 @@ export default function EditBlogPostPage() {
       const response = await fetch(`/api/admin/blog/${postId}`, {
         method: 'PUT',
         headers: { 
-          'Content-Type': 'application/json',
-          'x-admin-secret': getAdminSecret()
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(postData)
       })
@@ -168,7 +165,6 @@ export default function EditBlogPostPage() {
       const response = await fetch(`/api/admin/blog/${postId}`, {
         method: 'DELETE',
         headers: {
-          'x-admin-secret': getAdminSecret()
         }
       })
 

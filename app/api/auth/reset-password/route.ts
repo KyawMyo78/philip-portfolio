@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
 
     // Check if any token matches and is not expired
     let validTokenDoc = null;
-    snapshot.forEach(doc => {
+    snapshot.forEach((doc: any) => {
       const data = doc.data();
       const expiresAt = new Date(data.expiresAt);
       if (expiresAt > new Date()) {
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
 
     // Delete all reset tokens for this email
     const batch = adminDb.batch();
-    snapshot.docs.forEach((doc) => {
+    snapshot.docs.forEach((doc: any) => {
       batch.delete(doc.ref);
     });
     await batch.commit();

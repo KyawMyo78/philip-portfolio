@@ -296,31 +296,10 @@ export default function SiteSettings() {
         </div>
       </div>
 
-      {/* Warning */}
-      <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-        <div className="flex items-start space-x-3">
-          <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5" />
-          <div>
-            <h3 className="text-sm font-medium text-amber-800">Important Note</h3>
-            <p className="text-sm text-amber-700 mt-1">
-              Changes made here will immediately reflect on your live website. Make sure to preview your changes before saving.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Save Reminder Notice */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <div className="flex items-start space-x-3">
-          <Save className="h-5 w-5 text-blue-600 mt-0.5" />
-          <div>
-            <h3 className="text-sm font-medium text-blue-800">Remember to Save Your Changes</h3>
-            <p className="text-sm text-blue-700 mt-1">
-              Don't forget to click "Save Changes" after making any modifications. Your changes won't be preserved until saved.
-            </p>
-          </div>
-        </div>
-      </div>
+      <p className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+        <AlertCircle className="h-4 w-4 shrink-0" />
+        Changes go live on your website as soon as you press Save.
+      </p>
 
       {/* General Settings */}
       <div className="bg-white p-6 rounded-lg shadow-md">
@@ -393,18 +372,6 @@ export default function SiteSettings() {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Contact Button Text
-            </label>
-            <input
-              type="text"
-              value={settings.hero.contactButtonText}
-              onChange={(e) => handleSectionChange('hero', 'contactButtonText', e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Get In Touch"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
               CV Button Text
             </label>
             <input
@@ -413,18 +380,6 @@ export default function SiteSettings() {
               onChange={(e) => handleSectionChange('hero', 'cvButtonText', e.target.value)}
               className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Download CV"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              CV Not Available Text
-            </label>
-            <input
-              type="text"
-              value={settings.hero.cvNotAvailableText}
-              onChange={(e) => handleSectionChange('hero', 'cvNotAvailableText', e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="CV Not Available"
             />
           </div>
         </div>
@@ -447,18 +402,6 @@ export default function SiteSettings() {
               onChange={(e) => handleSectionChange('navigation', 'siteName', e.target.value)}
               placeholder="Site name shown in navbar (e.g. Your Name)"
               className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-4"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Home Menu Text
-            </label>
-            <input
-              type="text"
-              value={settings.navigation.homeText}
-              onChange={(e) => handleSectionChange('navigation', 'homeText', e.target.value)}
-              placeholder="Home"
-              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
           <div>
@@ -814,29 +757,6 @@ export default function SiteSettings() {
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Email Me (Quick Contact)</label>
-              <input
-                type="text"
-                value={settings.contact.quickContactEmail || ''}
-                onChange={(e) => handleSectionChange('contact', 'quickContactEmail', e.target.value)}
-                placeholder="contact@example.com"
-                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Call Me (Quick Contact)</label>
-              <input
-                type="text"
-                value={settings.contact.quickContactPhone || ''}
-                onChange={(e) => handleSectionChange('contact', 'quickContactPhone', e.target.value)}
-                placeholder="+[country-code][number]"
-                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-          </div>
-
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Why Work With Me? (bullet list)</label>
             <div className="space-y-2">
@@ -918,23 +838,6 @@ export default function SiteSettings() {
   </div>
 
       {/* Save Button (Bottom) */}
-      <div className="flex justify-end">
-        <button
-          onClick={handleSave}
-          disabled={loading}
-          className={`flex items-center space-x-2 px-8 py-4 rounded-lg font-medium transition-all ${
-            loading
-              ? 'bg-gray-400 cursor-not-allowed'
-              : success
-              ? 'bg-green-600 hover:bg-green-700'
-              : 'bg-primary-600 hover:bg-primary-700'
-          } text-white`}
-        >
-          <Save size={20} />
-          <span>{loading ? 'Saving...' : success ? 'Saved!' : 'Save All Changes'}</span>
-        </button>
-      </div>
-
       {/* Bottom Save Button */}
       <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4 rounded-t-lg shadow-lg">
         <div className="flex justify-center">

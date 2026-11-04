@@ -7,7 +7,6 @@ import { ArrowLeft, Save, Eye } from 'lucide-react'
 import toast from 'react-hot-toast'
 import RichTextEditor from '@/components/RichTextEditor'
 import FileUpload from '@/components/FileUpload'
-import { getAdminSecret } from '@/lib/admin-config'
 
 interface BlogFormData {
   title: string
@@ -81,8 +80,7 @@ export default function NewBlogPostPage() {
       const response = await fetch('/api/admin/blog', {
         method: 'POST',
         headers: { 
-          'Content-Type': 'application/json',
-          'x-admin-secret': getAdminSecret()
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(postData)
       })
@@ -112,7 +110,7 @@ export default function NewBlogPostPage() {
   return (
     <div className="p-6 max-w-4xl mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
         <div className="flex items-center">
           <Link
             href="/admin/blog"
@@ -121,7 +119,7 @@ export default function NewBlogPostPage() {
             <ArrowLeft size={20} />
           </Link>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Create New Post</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Create New Post</h1>
             <p className="text-gray-600 mt-1">Write and publish a new blog post</p>
           </div>
         </div>

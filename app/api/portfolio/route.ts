@@ -12,9 +12,9 @@ export async function GET() {
     ]);
 
     const personalInfo = personalInfoSnapshot.docs[0]?.data() || null;
-    const skills = skillsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    const experience = experienceSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    const projects = projectsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const skills = skillsSnapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+    const experience = experienceSnapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+    const projects = projectsSnapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
 
     return NextResponse.json({
       success: true,

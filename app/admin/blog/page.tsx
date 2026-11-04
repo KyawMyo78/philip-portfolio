@@ -5,7 +5,6 @@ import Link from 'next/link'
 import { Plus, Edit, Trash2, Eye, Calendar, Clock, Search, RefreshCw } from 'lucide-react'
 import toast from 'react-hot-toast'
 import ConfirmDialog from '../../../components/ConfirmDialog'
-import { getAdminSecret } from '@/lib/admin-config'
 
 interface BlogPost {
   id: string
@@ -56,7 +55,6 @@ export default function AdminBlogPage() {
     try {
       const response = await fetch('/api/admin/blog', {
         headers: {
-          'x-admin-secret': getAdminSecret()
         }
       })
       const result = await response.json()
@@ -89,7 +87,6 @@ export default function AdminBlogPage() {
       const response = await fetch(`/api/admin/blog/${postToDelete}`, {
         method: 'DELETE',
         headers: {
-          'x-admin-secret': getAdminSecret()
         }
       })
       
@@ -122,8 +119,7 @@ export default function AdminBlogPage() {
       const response = await fetch(`/api/admin/blog/${id}`, {
         method: 'PATCH',
         headers: { 
-          'Content-Type': 'application/json',
-          'x-admin-secret': getAdminSecret()
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({ status })
       })

@@ -6,7 +6,7 @@ export async function GET() {
     const achievementsRef = adminDb.collection('achievements');
     const snapshot = await achievementsRef.orderBy('order', 'asc').get();
     
-    const achievements = snapshot.docs.map(doc => ({
+    const achievements = snapshot.docs.map((doc: any) => ({
       id: doc.id,
       ...doc.data()
     }));

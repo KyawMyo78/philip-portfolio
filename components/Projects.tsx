@@ -9,6 +9,7 @@ import { analytics } from '@/lib/analytics';
 import { ProjectCardSkeleton } from './SkeletonLoader';
 import ErrorState from './ErrorState';
 import { getCachedData, setCachedData, CACHE_KEYS } from '@/hooks/useDataPrefetch';
+import { StaggerContainer, StaggerItem } from './StaggerAnimation';
 
 interface Project {
   id: string;
@@ -30,9 +31,11 @@ interface Project {
   slug?: string;
 }
 
-export default function Projects() {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+type Props = { projects?: Project[] };
+
+export default function Projects({ projects: serverProjects }: Props) {
+  const [projects, setProjects] = useState<Project[]>(serverProjects || []);
+  const [isLoading, setIsLoading] = useState(!serverProjects);
   const [error, setError] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
@@ -46,8 +49,10 @@ export default function Projects() {
   };
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (!serverProjects) {
+      fetchData();
+    }
+  }, [serverProjects]);
 
   const fetchData = async () => {
     try {
@@ -280,18 +285,19 @@ export default function Projects() {
             transition={{ duration: 0.6, delay: 0.3 }}
             className="mb-16"
           >
-              <h3 className="text-2xl font-bold text-center mb-8 text-clover-700">Featured Projects</h3>
-            <div className="grid lg:grid-cols-2 gap-8">
+            <h3 className="text-2xl font-bold text-center mb-8 text-clover-700">Featured Projects</h3>
+            <StaggerContainer className="grid lg:grid-cols-2 gap-8" staggerDelay={0.15}>
               {featuredProjects.map((project, index) => (
-                <ProjectCard 
-                  key={project.id} 
-                  project={project} 
-                  featured={true} 
-                  index={index}
-                  onProjectClick={handleProjectNavigation}
-                />
+                <StaggerItem key={project.id}>
+                  <ProjectCard 
+                    project={project} 
+                    featured={true} 
+                    index={index}
+                    onProjectClick={handleProjectNavigation}
+                  />
+                </StaggerItem>
               ))}
-            </div>
+            </StaggerContainer>
           </motion.div>
         )}
 
@@ -304,17 +310,18 @@ export default function Projects() {
             transition={{ duration: 0.6, delay: 0.4 }}
           >
             <h3 className="text-2xl font-bold text-center mb-8 text-clover-900">All Projects</h3>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <StaggerContainer className="grid md:grid-cols-2 lg:grid-cols-3 gap-6" staggerDelay={0.1}>
               {otherProjects.map((project, index) => (
-                <ProjectCard 
-                  key={project.id} 
-                  project={project} 
-                  featured={false} 
-                  index={index}
-                  onProjectClick={handleProjectNavigation}
-                />
+                <StaggerItem key={project.id}>
+                  <ProjectCard 
+                    project={project} 
+                    featured={false} 
+                    index={index}
+                    onProjectClick={handleProjectNavigation}
+                  />
+                </StaggerItem>
               ))}
-            </div>
+            </StaggerContainer>
           </motion.div>
         )}
 
@@ -365,8 +372,13 @@ function ProjectCard({ project, featured, index, onProjectClick }: ProjectCardPr
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.6, delay: index * 0.1 }}
+      whileHover={{ 
+        y: -8,
+        scale: 1.02,
+        transition: { duration: 0.3, ease: 'easeOut' }
+      }}
       onClick={handleCardClick}
-      className={`bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer transform hover:scale-[1.02] ${
+      className={`bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300 overflow-hidden group cursor-pointer ${
         featured ? 'lg:col-span-1' : ''
       }`}
     >

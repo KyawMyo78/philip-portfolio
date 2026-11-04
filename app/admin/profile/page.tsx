@@ -7,7 +7,6 @@ import IconPickerModal from '../../../components/IconPickerModal';
 import IconPreview from '../../../components/IconPreview';
 import FileUpload from '../../../components/FileUpload';
 import { socialIcons, getSocialIcon, SocialLink } from '../../../lib/socialIcons';
-import IconScroller from '../../../components/IconScroller';
 
 interface ProfileData {
   name: string;
@@ -345,20 +344,6 @@ export default function ProfileManager() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Nickname
-              </label>
-              <input
-                type="text"
-                name="nickname"
-                value={profile.nickname}
-                onChange={handleInputChange}
-                placeholder="Nickname (optional)"
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
                 Professional Title
               </label>
               <input
@@ -433,7 +418,7 @@ export default function ProfileManager() {
   <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md lg:col-span-2">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">About Section</h2>
 
-          {/* About content: subtitle, skills, interests */}
+          {/* About content: subtitle, interests */}
           <div className="mb-6">
 
             <div className="space-y-4">
@@ -447,36 +432,6 @@ export default function ProfileManager() {
                   placeholder="Short subtitle (e.g., Passionate about building beautiful UIs)"
                   className="w-full p-2 border border-gray-300 rounded-md"
                 />
-              </div>
-
-              {/* Skills editor */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Skills</label>
-                <div className="space-y-2">
-                  {(profile.skills || []).map((s: any) => (
-                    <div key={s.name} className="flex items-center space-x-2">
-                      <input
-                        className="p-2 border rounded flex-1"
-                        placeholder="Skill name"
-                        value={s.name}
-                        onChange={(e) => setProfile(prev => ({ ...prev, skills: (prev.skills || []).map((item: any) => item.name === s.name ? { ...item, name: e.target.value } : item) }))}
-                      />
-                      <input
-                        type="number"
-                        className="p-2 border rounded w-24"
-                        value={s.level}
-                        onChange={(e) => setProfile(prev => ({ ...prev, skills: (prev.skills || []).map((item: any) => item.name === s.name ? { ...item, level: Number(e.target.value) } : item) }))}
-                      />
-                      <button onClick={() => handleRemoveSkill(s.name)} className="bg-red-100 text-red-700 px-2 py-1 rounded hover:bg-red-200 transition-colors">Remove</button>
-                    </div>
-                  ))}
-
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-2 mt-2">
-                    <input value={newSkill.name} onChange={(e) => setNewSkill(prev => ({ ...prev, name: e.target.value }))} placeholder="Skill name" className="p-2 border rounded flex-1" />
-                    <input type="number" value={newSkill.level} onChange={(e) => setNewSkill(prev => ({ ...prev, level: Number(e.target.value) }))} className="p-2 border rounded w-24" />
-                    <button onClick={handleAddSkill} className="bg-primary-900 text-white px-3 py-1 rounded hover:bg-primary-800 transition-colors">Add</button>
-                  </div>
-                </div>
               </div>
 
               {/* Interests editor */}
@@ -650,11 +605,11 @@ export default function ProfileManager() {
                   const IconComponent = iconConfig?.icon || ExternalLink;
                   return (
                     <div key={link.id} className="flex flex-col sm:flex-row sm:items-center justify-between bg-white p-2 sm:p-4 rounded-lg border border-gray-200 gap-2">
-                      <div className="flex items-center gap-2 sm:gap-4">
-                        <div className="p-2 bg-gray-100 rounded-lg">
+                      <div className="flex min-w-0 items-center gap-2 sm:gap-4">
+                        <div className="shrink-0 p-2 bg-gray-100 rounded-lg">
                           <IconComponent className="h-5 w-5 text-gray-600" />
                         </div>
-                        <div>
+                        <div className="min-w-0">
                           <p className="font-medium text-gray-900">{link.name}</p>
                           <p className="text-sm text-gray-600 truncate max-w-md">{link.url}</p>
                         </div>
@@ -687,7 +642,7 @@ export default function ProfileManager() {
         </div>
 
         {/* CV Link */}
-        <div className="bg-white p-6 rounded-lg shadow-md lg:col-span-2">
+        <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md lg:col-span-2">
           <div className="flex items-center space-x-2 mb-4">
             <FileText className="h-5 w-5 text-gray-600" />
             <h2 className="text-lg font-semibold text-gray-900">CV/Resume Link</h2>
@@ -711,9 +666,9 @@ export default function ProfileManager() {
             {profile.cvUrl && (
               <div className="p-4 bg-gray-50 rounded-lg">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 sm:gap-3">
-                    <FileText className="h-8 w-8 text-primary-600" />
-                    <div>
+                    <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+                    <FileText className="h-8 w-8 shrink-0 text-primary-600" />
+                    <div className="min-w-0">
                       <p className="text-sm font-medium text-gray-900">Current CV Link</p>
                       <p className="text-xs text-gray-500 truncate max-w-md">{profile.cvUrl}</p>
                     </div>
@@ -743,85 +698,6 @@ export default function ProfileManager() {
               <li>For Google Drive: Right-click → Share → Copy link (make sure "Anyone with link" can view)</li>
             </ul>
           </div>
-        </div>
-      </div>
-
-      {/* Icon Scroller Management */}
-      <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md lg:col-span-2">
-        <div className="flex items-center space-x-2 mb-4">
-          <ExternalLink className="h-5 w-5 text-gray-600" />
-          <h2 className="text-lg font-semibold text-gray-900">Homepage Icon Scroller</h2>
-        </div>
-
-        <p className="text-sm text-gray-600 mb-4">Add icons to the homepage scroller. You can upload an SVG or choose from the icon library.</p>
-
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Type</label>
-              <select value={newScrollerItemType} onChange={(e) => setNewScrollerItemType(e.target.value as any)} className="w-full p-3 border rounded">
-                <option value="library">Icon Library</option>
-                <option value="svg">Upload SVG</option>
-              </select>
-            </div>
-
-            <div>
-              {newScrollerItemType === 'library' ? (
-                <>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Library Icon</label>
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center">
-                      <IconPreview name={newScrollerLibraryKey} className="w-5 h-5 text-gray-700" />
-                    </div>
-                    <div className="flex-1">
-                      <IconPickerModal value={newScrollerLibraryKey} onChange={(key: string) => setNewScrollerLibraryKey(key)} />
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">SVG File</label>
-                  <FileUpload uploadType="general" acceptedTypes="image/svg+xml" onUploadComplete={(url, fileName) => {
-                    // Fetch the uploaded svg and store its content as data URL
-                    (async () => {
-                      try {
-                        const res = await fetch(url);
-                        const text = await res.text();
-                        // sanitize minimally by ensuring it starts with <svg
-                        const svg = text.trim().startsWith('<svg') ? text : `<svg>${text}</svg>`;
-                        setNewScrollerSvgData(svg);
-                      } catch (e) {
-                        console.error('Failed to fetch uploaded svg', e);
-                      }
-                    })();
-                  }} />
-                </>
-              )}
-            </div>
-
-            <div className="flex items-end">
-              <button onClick={handleAddScrollerItem} className="w-full bg-primary-900 text-white px-4 py-3 rounded hover:bg-primary-800 transition-colors">Add to Scroller</button>
-            </div>
-          </div>
-
-          {/* Current scroller items */}
-          {(profile.iconScroller || []).length > 0 && (
-            <div className="space-y-3">
-              <h3 className="text-md font-medium text-gray-800">Current Scroller Items</h3>
-              <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3">
-                {(profile.iconScroller || []).map((it: any) => (
-                  <div key={it.id} className="p-2 border rounded flex flex-col items-center gap-2">
-                    <div className="w-10 h-10 flex items-center justify-center bg-gray-100 rounded">
-                      {it.type === 'library' ? <IconPreview name={it.key} className="w-5 h-5" /> : <div className="w-5 h-5" dangerouslySetInnerHTML={{ __html: it.svgData || '' }} />}
-                    </div>
-                    <div className="flex gap-2">
-                      <button onClick={() => handleRemoveScrollerItem(it.id)} className="text-red-600 text-sm">Remove</button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       </div>
 

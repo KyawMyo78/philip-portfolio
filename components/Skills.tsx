@@ -16,6 +16,7 @@ import { SkillCardSkeleton } from './SkeletonLoader';
 import ErrorState from './ErrorState';
 import { usePortfolioData } from './PortfolioDataProvider';
 import { getCachedData, setCachedData, CACHE_KEYS } from '@/hooks/useDataPrefetch';
+import { StaggerContainer, StaggerItem } from './StaggerAnimation';
 
 interface Skill {
   id: string;
@@ -29,6 +30,8 @@ interface Skill {
   featured: boolean;
   order: number;
 }
+
+type Props = { skills?: Skill[] };
 
 const categoryIcons: { [key: string]: any } = {
   'programming': Code,
@@ -100,17 +103,19 @@ const getYearsOfExperience = (skill: Skill): number => {
   return skill.yearsOfExperience ?? 0;
 };
 
-export default function Skills() {
-  const [skills, setSkills] = useState<Skill[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+export default function Skills({ skills: serverSkills }: Props) {
+  const [skills, setSkills] = useState<Skill[]>(serverSkills || []);
+  const [isLoading, setIsLoading] = useState(!serverSkills);
   const [error, setError] = useState<string | null>(null);
   const [siteSettings, setSiteSettings] = useState<any>(null);
   
   const portfolioData = usePortfolioData();
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (!serverSkills) {
+      fetchData();
+    }
+  }, [serverSkills]);
 
   const fetchData = async () => {
     try {
@@ -299,20 +304,21 @@ export default function Skills() {
         </motion.div>
 
         {/* Skills Grid */}
-  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+  <StaggerContainer className="grid md:grid-cols-2 lg:grid-cols-3 gap-8" staggerDelay={0.15}>
           {sortedCategories.map((categoryName, categoryIndex) => {
             const categorySkills = skillsByCategory[categoryName];
             const IconComponent = categoryIcons[categoryName] || categoryIcons['default'];
             const colorClass = categoryColors[categoryName] || categoryColors['default'];
 
             return (
+              <StaggerItem key={categoryName}>
               <motion.div
-                key={categoryName}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: categoryIndex * 0.1 }}
-                className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-clover-100"
+                whileHover={{ 
+                  y: -8,
+                  scale: 1.02,
+                  transition: { duration: 0.3, ease: 'easeOut' }
+                }}
+                className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-2xl transition-shadow duration-300 border border-clover-100 h-full"
               >
                 {/* Category Header */}
                 <div className="flex items-center mb-6">
@@ -381,9 +387,10 @@ export default function Skills() {
                   ))}
                 </div>
               </motion.div>
+              </StaggerItem>
             );
           })}
-        </div>
+        </StaggerContainer>
 
         {/* Skills Summary */}
         <motion.div

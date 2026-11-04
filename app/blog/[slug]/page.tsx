@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { Calendar, Clock, ArrowLeft, Tag, Share2, Check } from 'lucide-react'
+import { motion, useScroll, useSpring, useTransform, useReducedMotion } from 'framer-motion'
+import { ArrowLeft, Share2, Check } from 'lucide-react'
 import toast from 'react-hot-toast'
-import NavigationWithChat from '@/components/NavigationWithChat'
-import Footer from '@/components/Footer'
+import BlogShell from '@/components/home/BlogShell'
+import { Reveal, ease, arr } from '@/components/home/ui'
 
 interface BlogPost {
   id: string
@@ -17,15 +18,14 @@ interface BlogPost {
   featuredImage?: string
   category: string
   tags: string[]
-  status: 'draft' | 'published' | 'archived'
-  publishedAt?: Date
+  publishedAt?: string
   author: string
   readTime: number
   views: number
-  featured: boolean
-  createdAt: Date
-  updatedAt?: Date
+  createdAt: string
 }
+
+const fmt = (d?: string) => (d ? new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '')
 
 export default function BlogPostPage() {
   const params = useParams()
@@ -35,276 +35,160 @@ export default function BlogPostPage() {
   const [copied, setCopied] = useState(false)
 
   useEffect(() => {
-    if (params.slug) {
-      fetchPost(params.slug as string)
-    }
+    if (!params.slug) return
+    fetch(`/api/blog/slug/${params.slug}`)
+      .then((r) => r.json())
+      .then((r) => {
+        if (!r.success || !r.data) return setNotFound(true)
+        setPost(r.data)
+        // count the view (uses the fetched count, not stale state)
+        const views = (r.data.views || 0) + 1
+        fetch(`/api/blog/${r.data.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ views }) })
+          .then(() => setPost((p) => (p ? { ...p, views } : p)))
+          .catch(() => {})
+      })
+      .catch(() => setNotFound(true))
+      .finally(() => setLoading(false))
   }, [params.slug])
 
-  const fetchPost = async (slug: string) => {
+  const share = async () => {
+    const url = window.location.href
     try {
-      const response = await fetch(`/api/blog/slug/${slug}`)
-      const result = await response.json()
-      
-      if (result.success && result.data) {
-        setPost(result.data)
-        // Increment view count
-        incrementViews(result.data.id)
-      } else {
-        setNotFound(true)
+      if (navigator.share && window.matchMedia('(pointer: coarse)').matches) {
+        await navigator.share({ title: post?.title, url }) // phones: native share sheet
+        return
       }
-    } catch (error) {
-      console.error('Error fetching blog post:', error)
-      setNotFound(true)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const incrementViews = async (postId: string) => {
-    try {
-      await fetch(`/api/blog/${postId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ views: (post?.views || 0) + 1 })
-      })
-      // Update local state to reflect new view count
-      setPost(prev => prev ? ({ ...prev, views: (prev.views || 0) + 1 }) : prev)
-    } catch (error) {
-      console.error('Error incrementing views:', error)
-    }
-  }
-
-  const formatDate = (date: Date | string) => {
-    return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    })
-  }
-
-  const copyToClipboard = async () => {
-    try {
-      const url = window.location.href
-      
-      // Modern browser support
-      if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(url)
-      } else {
-        // Fallback for older browsers
-        const textArea = document.createElement('textarea')
-        textArea.value = url
-        textArea.style.position = 'fixed'
-        textArea.style.left = '-999999px'
-        textArea.style.top = '-999999px'
-        document.body.appendChild(textArea)
-        textArea.focus()
-        textArea.select()
-        document.execCommand('copy')
-        textArea.remove()
-      }
-      
+      await navigator.clipboard.writeText(url)
       setCopied(true)
-      toast.success('Link copied to clipboard!')
-      
-      // Reset the copied state after 2 seconds
-      setTimeout(() => {
-        setCopied(false)
-      }, 2000)
-    } catch (error) {
-      console.error('Failed to copy link:', error)
-      toast.error('Failed to copy link')
+      toast.success('Link copied!')
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      /* user closed the share sheet, or clipboard blocked */
     }
-  }
-
-  if (loading) {
-    return (
-      <main className="min-h-screen">
-        <NavigationWithChat />
-        <div className="pt-32 pb-16">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
-              <p className="mt-4 text-gray-600">Loading article...</p>
-            </div>
-          </div>
-        </div>
-        <Footer />
-      </main>
-    )
-  }
-
-  if (notFound || !post) {
-    return (
-      <main className="min-h-screen">
-        <NavigationWithChat />
-        <div className="pt-32 pb-16">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">Article Not Found</h1>
-            <p className="text-gray-600 mb-8">The article you're looking for doesn't exist or has been moved.</p>
-            <Link
-              href="/blog"
-              className="inline-flex items-center px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
-            >
-              <ArrowLeft size={20} className="mr-2" />
-              Back to Blog
-            </Link>
-          </div>
-        </div>
-        <Footer />
-      </main>
-    )
   }
 
   return (
-    <main className="min-h-screen">
-      <NavigationWithChat />
-      
-      {/* Article Header */}
-      <article className="pt-32 pb-16">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Back Button */}
-          <Link
-            href="/blog"
-            className="inline-flex items-center text-primary-600 hover:text-primary-700 mb-8 transition-colors"
-          >
-            <ArrowLeft size={20} className="mr-2" />
-            Back to Blog
+    <BlogShell>
+      {loading ? (
+        <div className="grid min-h-[70vh] place-items-center"><span className="h-2 w-2 animate-pulse rounded-full bg-volt" /></div>
+      ) : notFound || !post ? (
+        <NotFound />
+      ) : (
+        <Article post={post} copied={copied} onShare={share} />
+      )}
+    </BlogShell>
+  )
+}
+
+function Article({ post, copied, onShare }: { post: BlogPost; copied: boolean; onShare: () => void }) {
+  const reduce = useReducedMotion()
+  const body = useRef<HTMLDivElement>(null)
+  const img = useRef<HTMLDivElement>(null)
+  // reading progress across the article body
+  const { scrollYProgress } = useScroll({ target: body, offset: ['start 40%', 'end 80%'], layoutEffect: false })
+  const progress = useSpring(scrollYProgress, { stiffness: 120, damping: 30 })
+  // cover image zooms out as it scrolls through
+  const { scrollYProgress: imgProg } = useScroll({ target: img, offset: ['start end', 'end start'], layoutEffect: false })
+  const imgScale = useTransform(imgProg, [0, 1], reduce ? [1, 1] : [1.18, 1])
+  const tags = arr(post.tags)
+  const ShareBtn = ({ big }: { big?: boolean }) => (
+    <button onClick={onShare} className={`inline-flex items-center gap-2 rounded-full border transition-colors ${big ? 'h-12 bg-cream px-6 font-semibold text-ink border-cream' : 'h-10 border-cream/25 px-4 text-sm hover:border-cream'}`}>
+      {copied ? <Check size={16} /> : <Share2 size={16} />} {copied ? 'Copied' : big ? 'Share this article' : 'Share'}
+    </button>
+  )
+
+  return (
+    <article>
+      <motion.div style={{ scaleX: progress }} className="fixed inset-x-0 top-0 z-[60] h-[3px] origin-left bg-volt" />
+
+      <header className="px-5 pb-12 pt-32 md:px-11 md:pt-44">
+        <div className="mx-auto max-w-[1100px]">
+          <Link href="/blog" className="mb-10 inline-flex items-center gap-2 text-sm text-cream/60 transition-colors hover:text-cream">
+            <ArrowLeft size={16} /> All articles
           </Link>
-
-          {/* Article Meta */}
-          <div className="mb-8">
-            <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
-              <span className="bg-primary-100 text-primary-700 px-3 py-1 rounded-full">
-                {post.category}
+          <Reveal>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs uppercase tracking-[0.16em] text-cream/50">
+              {post.category && <span className="text-volt">{post.category}</span>}
+              <span>{fmt(post.publishedAt || post.createdAt)}</span>
+              {post.readTime > 0 && <span>· {post.readTime} min read</span>}
+            </div>
+          </Reveal>
+          <h1 className="mt-5 font-display text-[clamp(48px,8vw,120px)] uppercase leading-[0.92]">
+            {post.title.split(' ').map((w, i) => (
+              <span key={i} className="inline-block overflow-hidden pb-[0.04em] align-bottom">
+                <motion.span className="inline-block" initial={{ y: '110%' }} animate={{ y: '0%' }} transition={{ duration: 0.8, delay: 0.1 + i * 0.05, ease }}>
+                  {w}&nbsp;
+                </motion.span>
               </span>
-              <div className="flex items-center gap-1">
-                <Calendar size={16} />
-                <span>{formatDate(post.publishedAt || post.createdAt)}</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Clock size={16} />
-                <span>{post.readTime} min read</span>
-              </div>
-            </div>
-
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 break-words">
-              {post.title}
-            </h1>
-
-            <p className="text-xl text-gray-600 mb-6 break-words">
-              {post.excerpt}
+            ))}
+          </h1>
+          {post.excerpt && (
+            <Reveal delay={0.2}>
+              <p className="mt-6 max-w-3xl text-xl leading-relaxed text-cream/70">{post.excerpt}</p>
+            </Reveal>
+          )}
+          <Reveal delay={0.3} className="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-cream/10 pt-6">
+            <p className="text-sm text-cream/60">
+              By <span className="text-cream">{post.author}</span>
+              {post.views > 0 && <span> · {post.views} views</span>}
             </p>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-6">
-                <p className="text-gray-600 truncate max-w-[200px]" title={post.author}>
-                  By <span className="font-medium">{post.author}</span>
-                </p>
-                <p className="text-sm text-gray-500">
-                  {post.views} views
-                </p>
-              </div>
-              
-              {/* Share Button */}
-              <button
-                onClick={copyToClipboard}
-                className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg border transition-all duration-200 ${
-                  copied
-                    ? 'bg-green-50 border-green-200 text-green-700'
-                    : 'bg-white border-gray-200 text-gray-600 hover:bg-primary-50 hover:border-primary-200 hover:text-primary-700'
-                }`}
-                title="Copy link to share"
-              >
-                {copied ? (
-                  <>
-                    <Check size={16} />
-                    <span className="text-sm font-medium">Copied!</span>
-                  </>
-                ) : (
-                  <>
-                    <Share2 size={16} />
-                    <span className="text-sm font-medium">Share</span>
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-
-          {/* Featured Image */}
-          {post.featuredImage && (
-            <div className="mb-8 rounded-xl overflow-hidden">
-              <img
-                src={post.featuredImage}
-                alt={post.title}
-                className="w-full h-64 md:h-96 object-cover"
-              />
-            </div>
-          )}
-
-          {/* Article Content */}
-          <div className="rich-text-content mb-8 max-w-none break-words overflow-wrap-anywhere">
-            <div 
-              className="prose prose-lg max-w-none break-words"
-              dangerouslySetInnerHTML={{ __html: post.content }} 
-            />
-          </div>
-
-          {/* Tags */}
-          {post.tags && post.tags.length > 0 && (
-            <div className="border-t pt-8 mb-8">
-              <div className="flex items-center gap-2 mb-4">
-                <Tag size={20} className="text-gray-500" />
-                <span className="font-medium text-gray-700">Tags:</span>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {post.tags.map((tag, index) => (
-                  <span
-                    key={index}
-                    className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm truncate max-w-[200px]"
-                    title={tag}
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Share Section */}
-          <div className="border-t pt-8">
-            <div className="bg-primary-50 rounded-xl p-6 text-center">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Enjoyed this article?
-              </h3>
-              <p className="text-gray-600 mb-4">
-                Share it with others who might find it useful!
-              </p>
-              <button
-                onClick={copyToClipboard}
-                className={`inline-flex items-center gap-2 px-6 py-3 rounded-lg transition-all duration-200 ${
-                  copied
-                    ? 'bg-green-500 text-white'
-                    : 'bg-primary-600 hover:bg-primary-700 text-white'
-                }`}
-              >
-                {copied ? (
-                  <>
-                    <Check size={18} />
-                    <span className="font-medium">Link Copied!</span>
-                  </>
-                ) : (
-                  <>
-                    <Share2 size={18} />
-                    <span className="font-medium">Copy Link to Share</span>
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
+            <ShareBtn />
+          </Reveal>
         </div>
-      </article>
+      </header>
 
-      <Footer />
-    </main>
+      {post.featuredImage && (
+        <div className="px-5 md:px-11">
+          <motion.div
+            ref={img}
+            initial={{ clipPath: 'inset(10% 10% 10% 10% round 28px)', opacity: 0 }}
+            animate={{ clipPath: 'inset(0% 0% 0% 0% round 28px)', opacity: 1 }}
+            transition={{ duration: 1.2, delay: 0.3, ease }}
+            className="mx-auto aspect-[16/9] max-w-[1300px] overflow-hidden rounded-[28px] bg-cream/5"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <motion.img src={post.featuredImage} alt={post.title} style={{ scale: imgScale }} className="h-full w-full object-cover" />
+          </motion.div>
+        </div>
+      )}
+
+      <div className="px-5 py-16 md:px-11 md:py-24">
+        <div ref={body} className="mx-auto max-w-[760px]">
+          <div className="rich-text-content text-lg" dangerouslySetInnerHTML={{ __html: post.content }} />
+
+          {tags.length > 0 && (
+            <div className="mt-14 flex flex-wrap gap-2 border-t border-cream/10 pt-8">
+              {tags.map((t) => <span key={t} className="rounded-full border border-cream/15 px-3 py-1 text-xs text-cream/70">#{t}</span>)}
+            </div>
+          )}
+
+          <Reveal className="mt-16 rounded-[28px] border border-cream/10 bg-[#091018]/90 p-8 text-center md:p-12">
+            <p className="font-display text-4xl uppercase md:text-5xl">Enjoyed this?</p>
+            <p className="mx-auto mt-3 max-w-md text-cream/60">Share it with someone who might find it useful.</p>
+            <div className="mt-8 flex flex-wrap justify-center gap-3">
+              <ShareBtn big />
+              <Link href="/blog" className="inline-flex h-12 items-center gap-2 rounded-full border border-cream/25 px-6 text-sm font-medium transition-colors hover:border-cream">
+                <ArrowLeft size={16} /> More articles
+              </Link>
+            </div>
+          </Reveal>
+        </div>
+      </div>
+    </article>
+  )
+}
+
+function NotFound() {
+  return (
+    <div className="grid min-h-[80vh] place-items-center px-5 pt-24 text-center">
+      <div>
+        <p className="font-mono text-sm text-volt">404 · article not found</p>
+        <h1 className="mt-4 font-display text-[clamp(56px,10vw,140px)] uppercase leading-[0.9]">Lost in the city</h1>
+        <p className="mx-auto mt-4 max-w-md text-cream/60">This article doesn’t exist or has been moved.</p>
+        <Link href="/blog" className="mt-10 inline-flex h-12 items-center gap-2 rounded-full bg-cream px-6 text-sm font-semibold text-ink">
+          <ArrowLeft size={16} /> Back to all articles
+        </Link>
+      </div>
+    </div>
   )
 }

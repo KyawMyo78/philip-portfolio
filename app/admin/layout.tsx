@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { 
@@ -18,26 +18,20 @@ import {
   Settings,
   BookOpen,
   MessageSquare,
-  HelpCircle
+  HelpCircle,
+  Palette
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import FloatingAIButton from '../../components/FloatingAIButton';
 
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [prevSnapshot, setPrevSnapshot] = useState<{
-    path: string | null;
-    node: React.ReactNode | null;
-  }>({ path: null, node: null });
-  const snapshotRef = useRef<NodeJS.Timeout | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [siteSettings, setSiteSettings] = useState<any>(null);
   const router = useRouter();
   const pathname = usePathname();
-  const pageCacheRef = useRef<Map<string, React.ReactNode>>(new Map());
 
   const navigationItems = [
     { id: 'overview', label: 'Dashboard', icon: Home, path: '/admin/dashboard' },
@@ -51,6 +45,7 @@ export default function AdminLayout({
     { id: 'achievements', label: 'Achievements', icon: Award, path: '/admin/achievements' },
     { id: 'user-manual', label: 'User Manual', icon: HelpCircle, path: '/admin/user-manual' },
     { id: 'settings', label: 'Site Settings', icon: Settings, path: '/admin/site-settings' },
+    { id: 'theme-settings', label: 'Theme Settings', icon: Palette, path: '/admin/theme-settings' },
   ];
 
   const handleLogout = async () => {
@@ -121,31 +116,6 @@ export default function AdminLayout({
       }
     });
   }, []); // run once on mount
-
-  // Keep previous children mounted briefly during route transitions to avoid blanking
-  useEffect(() => {
-    // store previous children snapshot
-    setPrevSnapshot((s) => ({ path: s.path ?? pathname, node: s.node ?? children }));
-    // clear any existing timeout
-    if (snapshotRef.current) {
-      clearTimeout(snapshotRef.current as unknown as number);
-    }
-    // keep previous content for 300ms to allow new route to hydrate
-    snapshotRef.current = setTimeout(() => {
-      setPrevSnapshot({ path: null, node: null });
-      snapshotRef.current = null;
-    }, 300);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname]);
-
-  // Cache rendered admin pages client-side so revisiting a page is instant
-  useEffect(() => {
-    try {
-      pageCacheRef.current.set(pathname, children);
-    } catch (e) {
-      // ignore caching errors
-    }
-  }, [pathname, children]);
 
   // Don't show layout on login page
   // Don't show layout on login, forgot-password, or reset-password pages
@@ -330,27 +300,18 @@ export default function AdminLayout({
 
           {/* Main Content */}
           <main className="flex-1 relative">
-            {/* previous snapshot sits underneath until cleared */}
-            {prevSnapshot.node && (
-              <div className="absolute inset-0">
-                <div className="h-full w-full">{prevSnapshot.node}</div>
-              </div>
-            )}
-
             <motion.div
+              key={pathname}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.25 }}
               className="relative"
             >
-              {/* Render cached page if available to avoid remounting heavy client bundles */}
-              {(pageCacheRef.current.get(pathname) as React.ReactNode) ?? children}
+              {children}
             </motion.div>
           </main>
         </div>
         
-        {/* Floating AI Assistant Button */}
-        <FloatingAIButton />
       </div>
     </div>
   );

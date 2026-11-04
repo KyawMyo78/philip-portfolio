@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
 
     // Check if any token matches and is not expired
     let validToken = false;
-    snapshot.forEach(doc => {
+    snapshot.forEach((doc: any) => {
       const data = doc.data();
       const expiresAt = new Date(data.expiresAt);
       if (expiresAt > new Date()) {

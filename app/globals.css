@@ -20,6 +20,12 @@
   }
 
   /* (removed global universal border apply) */
+
+  /* home page v2: headings inherit the dark theme instead of the global green serif */
+  html:has(.v2), body:has(.v2) { background: #05070a; }
+  .v2 :is(h1,h2,h3,h4,h5) { color: inherit; font-family: inherit; }
+  .v2 .font-display { font-family: var(--font-display), 'Arial Narrow', sans-serif; }
+  @media (prefers-reduced-motion: reduce) { .v2 *, .v2 *::before { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
 }
 
 @layer components {
@@ -259,3 +265,18 @@
   }
 }
 
+/* blog articles on the dark v2 pages */
+.v2 .rich-text-content { color: rgba(245,239,226,.78); }
+.v2 .rich-text-content :is(h1,h2,h3,h4) { color: #f5efe2; font-family: var(--font-display), 'Arial Narrow', sans-serif; text-transform: uppercase; letter-spacing: -0.005em; line-height: 1; }
+.v2 .rich-text-content h1 { font-size: 3rem; margin: 3rem 0 1.25rem; }
+.v2 .rich-text-content h2 { font-size: 2.4rem; margin: 2.75rem 0 1rem; }
+.v2 .rich-text-content h3 { font-size: 1.8rem; margin: 2.25rem 0 .75rem; }
+.v2 .rich-text-content :is(p,li) { color: rgba(245,239,226,.78); }
+.v2 .rich-text-content strong { color: #f5efe2; }
+.v2 .rich-text-content a { color: #38c8ff; text-decoration: underline; text-underline-offset: 4px; }
+.v2 .rich-text-content blockquote { background: rgba(56,200,255,.06); border-left-color: #38c8ff; color: rgba(245,239,226,.85); }
+.v2 .rich-text-content pre { background: #0b121a; border: 1px solid rgba(245,239,226,.1); color: #d7e6ee; }
+.v2 .rich-text-content code { background: rgba(245,239,226,.08); color: #9fe3ff; }
+.v2 .rich-text-content pre code { background: transparent; color: inherit; }
+.v2 .rich-text-content img { border-radius: 1.25rem; margin: 2rem 0; }
+.v2 .rich-text-content hr { border-color: rgba(245,239,226,.12); margin: 3rem 0; }

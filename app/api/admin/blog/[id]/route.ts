@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { initializeApp, getApps, cert } from 'firebase-admin/app'
 import { getFirestore } from 'firebase-admin/firestore'
+import { verifyAdminToken } from '@/lib/admin-token'
 
 if (!getApps().length) {
   initializeApp({
@@ -14,19 +15,17 @@ if (!getApps().length) {
 
 const db = getFirestore();
 
-// Helper function to check admin authentication
-function isAuthorized(req: Request) {
-  const headerSecret = req.headers.get('x-admin-secret');
-  const serverSecretExists = !!process.env.ADMIN_SECRET;
-  const isMatch = headerSecret && process.env.ADMIN_SECRET && headerSecret === process.env.ADMIN_SECRET;
-  return isMatch;
+// Admin session check (the middleware also enforces this; kept here as a second lock)
+async function isAuthorized(req: Request) {
+  const token = req.headers.get('cookie')?.match(/(?:^|;\s*)admin-token=([^;]+)/)?.[1];
+  return verifyAdminToken(token, process.env.NEXTAUTH_SECRET);
 }
 
 export async function GET(
   req: Request,
   { params }: { params: { id: string } }
 ) {
-  if (!isAuthorized(req)) {
+  if (!(await isAuthorized(req))) {
     return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -63,7 +62,7 @@ export async function PUT(
   req: Request,
   { params }: { params: { id: string } }
 ) {
-  if (!isAuthorized(req)) {
+  if (!(await isAuthorized(req))) {
     return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -126,7 +125,7 @@ export async function PATCH(
   req: Request,
   { params }: { params: { id: string } }
 ) {
-  if (!isAuthorized(req)) {
+  if (!(await isAuthorized(req))) {
     return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -189,7 +188,7 @@ export async function DELETE(
   req: Request,
   { params }: { params: { id: string } }
 ) {
-  if (!isAuthorized(req)) {
+  if (!(await isAuthorized(req))) {
     return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
   }
 

@@ -155,22 +155,22 @@ export async function POST(req: Request) {
         }
 
         if (skillsSnap && skillsSnap.docs?.length) {
-          const top = skillsSnap.docs.slice(0,6).map(d => d.data()?.name).filter(Boolean);
+          const top = skillsSnap.docs.slice(0,6).map((d: any) => d.data()?.name).filter(Boolean);
           if (top.length) summaryParts.push(`Top skills: ${top.join(', ')}`);
         }
 
         if (projectsSnap && projectsSnap.docs?.length) {
-          const recent = projectsSnap.docs.slice(0,4).map(d => d.data()?.title).filter(Boolean);
+          const recent = projectsSnap.docs.slice(0,4).map((d: any) => d.data()?.title).filter(Boolean);
           if (recent.length) summaryParts.push(`Recent projects: ${recent.join(' | ')}`);
         }
 
         if (blogsSnap && blogsSnap.docs?.length) {
-          const titles = blogsSnap.docs.map(d => d.data()?.title).filter(Boolean);
+          const titles = blogsSnap.docs.map((d: any) => d.data()?.title).filter(Boolean);
           if (titles.length) summaryParts.push(`Recent blogs: ${titles.slice(0,5).join(' | ')}`);
         }
 
         if (expSnap && expSnap.docs?.length) {
-          const roles = expSnap.docs.slice(0,3).map(d => `${d.data()?.title} @ ${d.data()?.company}`).filter(Boolean);
+          const roles = expSnap.docs.slice(0,3).map((d: any) => `${d.data()?.title} @ ${d.data()?.company}`).filter(Boolean);
           if (roles.length) summaryParts.push(`Recent experience: ${roles.join(' | ')}`);
         }
 

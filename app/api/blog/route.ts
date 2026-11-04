@@ -25,7 +25,7 @@ export async function GET() {
       .where('status', '==', 'published')
       .get();
 
-    const posts = snapshot.docs.map(doc => ({
+    const posts = snapshot.docs.map((doc: any) => ({
       id: doc.id,
       ...doc.data(),
       publishedAt: doc.data().publishedAt?.toDate(),

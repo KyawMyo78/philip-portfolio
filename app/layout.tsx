@@ -6,6 +6,7 @@ import { GoogleAnalytics } from '@next/third-parties/google'
 import { adminDb } from '../lib/firebase-admin';
 import { getCached, setCached } from '../lib/server-cache';
 import { PortfolioDataProvider } from '@/components/PortfolioDataProvider';
+import { ThemeProvider } from '@/contexts/ThemeContext';
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -92,8 +93,6 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-import { ChatProvider } from '../components/PublicChatWrapper';
-
 export default function RootLayout({
   children,
 }: {
@@ -102,11 +101,11 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth">
       <body className={inter.className}>
-        <PortfolioDataProvider>
-          <ChatProvider>
+        <ThemeProvider>
+          <PortfolioDataProvider>
             {children}
-          </ChatProvider>
-        </PortfolioDataProvider>
+          </PortfolioDataProvider>
+        </ThemeProvider>
         <Toaster 
           position="top-right"
           toastOptions={{

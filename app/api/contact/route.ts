@@ -51,7 +51,7 @@ export async function GET() {
       .limit(50)
       .get();
 
-    const contacts = snapshot.docs.map(doc => ({
+    const contacts = snapshot.docs.map((doc: any) => ({
       id: doc.id,
       ...doc.data()
     }));

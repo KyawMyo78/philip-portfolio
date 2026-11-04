@@ -9,7 +9,7 @@ export async function GET() {
       .orderBy('order', 'asc')
       .get();
 
-    const skills = snapshot.docs.map(doc => ({
+    const skills = snapshot.docs.map((doc: any) => ({
       id: doc.id,
       ...doc.data()
     }));

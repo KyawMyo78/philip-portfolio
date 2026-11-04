@@ -8,6 +8,7 @@ import { Calendar, MapPin, Building, ExternalLink, Briefcase } from 'lucide-reac
 import { ExperienceCardSkeleton } from './SkeletonLoader';
 import ErrorState from './ErrorState';
 import { getCachedData, setCachedData, CACHE_KEYS } from '@/hooks/useDataPrefetch';
+import { StaggerContainer, StaggerItem } from './StaggerAnimation';
 
 interface Experience {
   id: string;
@@ -25,15 +26,19 @@ interface Experience {
   order: number;
 }
 
-export default function Experience() {
-  const [experiences, setExperiences] = useState<Experience[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+type Props = { experience?: Experience[] };
+
+export default function Experience({ experience: serverExperience }: Props) {
+  const [experiences, setExperiences] = useState<Experience[]>(serverExperience || []);
+  const [isLoading, setIsLoading] = useState(!serverExperience);
   const [error, setError] = useState<string | null>(null);
   const [siteSettings, setSiteSettings] = useState<any>(null);
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (!serverExperience) {
+      fetchData();
+    }
+  }, [serverExperience]);
 
   const fetchData = async () => {
     try {
@@ -353,16 +358,10 @@ export default function Experience() {
           <div className="absolute left-1/2 transform -translate-x-1/2 top-8 bottom-8 w-0.5 bg-gradient-to-b from-clover-500 to-clover-300 hidden xl:block"></div>
 
           {/* Experience Items */}
-          <div className="space-y-8">
+          <StaggerContainer className="space-y-8" staggerDelay={0.15}>
             {experiences.map((experience, index) => (
-              <motion.div
-                key={experience.id}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                className="relative"
-              >
+              <StaggerItem key={experience.id}>
+              <div className="relative">
                 {/* Mobile/Tablet Layout (up to xl) - Simple left-aligned */}
                 <div className="xl:hidden flex gap-4">
                   <div className="flex-shrink-0 w-12 h-12 bg-white rounded-full border-4 border-clover-500 flex items-center justify-center shadow-lg">
@@ -371,9 +370,16 @@ export default function Experience() {
                       <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
                     )}
                   </div>
-                  <div className="flex-1 bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-gray-100">
+                  <motion.div
+                    whileHover={{ 
+                      y: -4,
+                      scale: 1.01,
+                      transition: { duration: 0.3, ease: 'easeOut' }
+                    }}
+                    className="flex-1 bg-white rounded-2xl shadow-lg p-6 hover:shadow-2xl transition-shadow duration-300 border border-gray-100"
+                  >
                     <ExperienceCard experience={experience} />
-                  </div>
+                  </motion.div>
                 </div>
 
                 {/* Desktop Layout (xl and above) - Alternating timeline */}
@@ -390,9 +396,16 @@ export default function Experience() {
                   <div className={`flex-1 max-w-lg ${
                     index % 2 === 0 ? 'mr-16' : 'ml-16 xl:order-2'
                   }`}>
-                    <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-gray-100">
+                    <motion.div
+                      whileHover={{ 
+                        y: -4,
+                        scale: 1.01,
+                        transition: { duration: 0.3, ease: 'easeOut' }
+                      }}
+                      className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-2xl transition-shadow duration-300 border border-gray-100"
+                    >
                       <ExperienceCard experience={experience} />
-                    </div>
+                    </motion.div>
                   </div>
 
                   {/* Spacer for alternating layout */}
@@ -400,9 +413,10 @@ export default function Experience() {
                     index % 2 === 0 ? 'xl:order-2' : 'mr-16'
                   }`}></div>
                 </div>
-              </motion.div>
+              </div>
+              </StaggerItem>
             ))}
-          </div>
+          </StaggerContainer>
         </div>
 
         {/* Experience Summary */}
