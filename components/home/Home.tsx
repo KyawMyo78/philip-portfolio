@@ -706,13 +706,13 @@ function Achievements({ items }: { items: any[] }) {
   return (
     <HorizontalPin id="achievements" head={<SectionHead n="05" label="Milestones" title="Achievements" className="mb-8 md:mb-12" />}>
       {sorted.map((a) => (
-        <div key={a.id} className="group w-[280px] shrink-0 overflow-hidden rounded-3xl border border-cream/10 bg-ink/80 backdrop-blur transition-colors hover:border-cream/30 md:w-[360px]">
+        <div key={a.id} className="group max-h-[calc(100svh-15rem)] w-[280px] shrink-0 overflow-hidden rounded-3xl border border-cream/10 bg-ink/80 backdrop-blur transition-colors hover:border-cream/30 md:w-[360px]">
           {a.image ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={a.image} alt={a.title} className="aspect-[16/10] w-full object-cover transition-transform duration-700 group-hover:scale-105" />
           ) : (
-            <div className="grid aspect-[16/10] place-items-center bg-[radial-gradient(circle_at_30%_20%,rgba(56,200,255,.25),transparent_60%)]">
-              <Star size={40} className="text-cream/40" />
+            <div className="grid aspect-[16/6] place-items-center bg-[radial-gradient(circle_at_30%_20%,rgba(56,200,255,.25),transparent_60%)]">
+              <Star size={32} className="text-cream/40" />
             </div>
           )}
           <div className="p-6">
