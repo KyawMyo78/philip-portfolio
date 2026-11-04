@@ -13,8 +13,8 @@ const PUBLIC_API: [string, RegExp][] = [
   ['POST', /^\/api\/auth(\/(forgot-password|reset-password|verify-reset-token))?$/],
   ['DELETE', /^\/api\/auth$/], // logout
   ['POST', /^\/api\/revalidate$/], // protected by its own REVALIDATE_SECRET
-  ['POST', /^\/api\/mcp$/], // Claude connector; checks CLAUDE_API_KEY itself
-  ['GET', /^\/api\/mcp$/],
+  ['POST', /^\/api\/mcp(\/[^/]+)?$/], // Claude connector; checks CLAUDE_API_KEY itself
+  ['GET', /^\/api\/mcp(\/[^/]+)?$/],
 ];
 const PUBLIC_ADMIN_PAGES = ['/admin/login', '/admin/forgot-password', '/admin/reset-password'];
 

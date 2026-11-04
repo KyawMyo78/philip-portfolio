@@ -9,7 +9,7 @@ GitHub: `KyawMyo78/philip-portfolio` (remote `origin`). Do not push to `template
 Changes go live immediately. Use the facts the user gives you (CV, messages) and do not invent dates,
 numbers or achievements. Ask before deleting anything.
 
-**Preferred: the MCP connector** at `https://kyawmyokhant.com/api/mcp` (tools: `get_overview`,
+**Preferred: the MCP connector** at `https://kyawmyokhant.com/api/mcp` (key as Bearer header, or in the path: `/api/mcp/<key>` for claude.ai) (tools: `get_overview`,
 `update_profile`, `update_site_settings`, `list_items`, `create_item`, `update_item`, `delete_item`,
 `list_contact_messages`, `list_recent_changes`). Every write is logged in the `claude-audit`
 Firestore collection with the data before the change, so it can be undone.
