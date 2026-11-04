@@ -5,7 +5,6 @@ import { Toaster } from 'react-hot-toast'
 import { GoogleAnalytics } from '@next/third-parties/google'
 import { adminDb } from '../lib/firebase-admin';
 import { getCached, setCached } from '../lib/server-cache';
-import { PortfolioDataProvider } from '@/components/PortfolioDataProvider';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 
 const inter = Inter({ subsets: ['latin'] })
@@ -102,9 +101,7 @@ export default function RootLayout({
     <html lang="en" className="scroll-smooth">
       <body className={inter.className}>
         <ThemeProvider>
-          <PortfolioDataProvider>
-            {children}
-          </PortfolioDataProvider>
+          {children}
         </ThemeProvider>
         <Toaster 
           position="top-right"

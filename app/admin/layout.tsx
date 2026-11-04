@@ -16,10 +16,7 @@ import {
   Home,
   ChevronLeft,
   Settings,
-  BookOpen,
-  MessageSquare,
-  HelpCircle,
-  Palette
+  BookOpen
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -40,12 +37,9 @@ export default function AdminLayout({
     { id: 'experience', label: 'Experience', icon: Briefcase, path: '/admin/experience' },
     { id: 'skills', label: 'Skills', icon: Code, path: '/admin/skills' },
     { id: 'blog', label: 'Blog', icon: BookOpen, path: '/admin/blog' },
-    { id: 'chat', label: 'AI Chat', icon: MessageSquare, path: '/admin/chat' },
     { id: 'contacts', label: 'Messages', icon: Mail, path: '/admin/contacts' },
     { id: 'achievements', label: 'Achievements', icon: Award, path: '/admin/achievements' },
-    { id: 'user-manual', label: 'User Manual', icon: HelpCircle, path: '/admin/user-manual' },
     { id: 'settings', label: 'Site Settings', icon: Settings, path: '/admin/site-settings' },
-    { id: 'theme-settings', label: 'Theme Settings', icon: Palette, path: '/admin/theme-settings' },
   ];
 
   const handleLogout = async () => {
@@ -96,7 +90,6 @@ export default function AdminLayout({
     else if (pathname.includes('/blog')) pageType = 'Admin Blog';
     else if (pathname.includes('/contacts')) pageType = 'Admin Messages';
     else if (pathname.includes('/achievements')) pageType = 'Admin Achievements';
-    else if (pathname.includes('/user-manual')) pageType = 'Admin User Manual';
     else if (pathname.includes('/site-settings')) pageType = 'Admin Settings';
     
     const pageTitle = `${siteName} | ${pageType}`;
