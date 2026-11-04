@@ -55,7 +55,7 @@ export const analytics = {
     trackEvent('project_view', 'engagement', projectName);
   },
   
-  projectLinkClick: (projectName: string, linkType: 'github' | 'live' | 'demo') => {
+  projectLinkClick: (projectName: string, linkType: 'github' | 'live' | 'demo' | 'link' | 'download') => {
     trackEvent('project_link_click', 'engagement', `${projectName}_${linkType}`);
   },
 

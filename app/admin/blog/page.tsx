@@ -53,9 +53,11 @@ export default function AdminBlogPage() {
 
   const fetchPosts = async () => {
     try {
-      const response = await fetch('/api/admin/blog', {
+      // Add cache-busting parameter to ensure fresh data
+      const response = await fetch(`/api/admin/blog?t=${Date.now()}`, {
         headers: {
-        }
+        },
+        cache: 'no-store'
       })
       const result = await response.json()
       if (result.success) {
@@ -257,25 +259,25 @@ export default function AdminBlogPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="min-w-full table-fixed">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="w-1/2 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Title
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="w-32 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="w-32 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Category
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="w-24 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Views
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="w-32 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Date
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="w-28 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
@@ -283,13 +285,13 @@ export default function AdminBlogPage() {
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredPosts.map((post) => (
                   <tr key={post.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4">
-                      <div>
-                        <div className="text-sm font-medium text-gray-900 line-clamp-2">{post.title}</div>
-                        <div className="text-sm text-gray-500 line-clamp-2">{post.excerpt}</div>
+                    <td className="px-6 py-4 max-w-0">
+                      <div className="min-w-0">
+                        <div className="text-sm font-medium text-gray-900 truncate overflow-hidden" title={post.title}>{post.title}</div>
+                        <div className="text-sm text-gray-500 truncate overflow-hidden" title={post.excerpt}>{post.excerpt}</div>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4 whitespace-nowrap">
                       <select
                         value={post.status}
                         onChange={(e) => updatePostStatus(post.id, e.target.value)}
@@ -300,18 +302,18 @@ export default function AdminBlogPage() {
                         <option value="archived">Archived</option>
                       </select>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-900">
-                      <span className="truncate max-w-[100px] inline-block" title={post.category}>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="truncate max-w-[150px] inline-block text-sm text-gray-900" title={post.category}>
                         {post.category}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-900">
+                    <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
                       <div className="flex items-center">
                         <Eye size={16} className="mr-1 text-gray-400" />
                         {post.views}
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-900">
+                    <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
                       <div className="flex items-center">
                         <Calendar size={16} className="mr-1 text-gray-400" />
                         {formatDate(post.createdAt)}

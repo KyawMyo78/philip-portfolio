@@ -23,10 +23,11 @@ interface Experience {
 // GET single experience
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const experienceId = params.id;
+    const { id } = await params;
+    const experienceId = id;
     
     const portfolioRef = adminDb.collection('portfolio').doc('data');
     const doc = await portfolioRef.get();
@@ -65,10 +66,11 @@ export async function GET(
 // UPDATE experience
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const experienceId = params.id;
+    const { id } = await params;
+    const experienceId = id;
     const experienceData = await request.json();
 
     // Validation
@@ -177,10 +179,11 @@ export async function PUT(
 // DELETE experience
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const experienceId = params.id;
+    const { id } = await params;
+    const experienceId = id;
     
     // Get current portfolio data
     const portfolioRef = adminDb.collection('portfolio').doc('data');

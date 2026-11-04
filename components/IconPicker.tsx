@@ -17,6 +17,14 @@ export default function IconPicker({ value, onChange }: { value?: string; onChan
 
   const filtered = ICON_LIST.filter(i => i.key.includes(query.toLowerCase()) || (i.label || '').toLowerCase().includes(query.toLowerCase()) || i.componentName.toLowerCase().includes(query.toLowerCase()));
 
+  // Deduplicate icons by key to avoid duplicate key errors
+  const uniqueIcons = filtered.reduce((acc, icon) => {
+    if (!acc.find(item => item.key === icon.key)) {
+      acc.push(icon);
+    }
+    return acc;
+  }, [] as typeof ICON_LIST);
+
   return (
     <div className="w-full">
       <div className="flex items-center gap-2">
@@ -30,7 +38,7 @@ export default function IconPicker({ value, onChange }: { value?: string; onChan
       </div>
 
       <div className="grid grid-cols-5 gap-2 mt-3 max-h-44 overflow-y-auto">
-        {filtered.map(icon => {
+        {uniqueIcons.map(icon => {
           const isSelected = value === icon.key;
           return (
             <button

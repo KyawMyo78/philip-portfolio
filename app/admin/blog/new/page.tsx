@@ -108,27 +108,27 @@ export default function NewBlogPostPage() {
   }
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="p-4 sm:p-6 max-w-4xl mx-auto">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
-        <div className="flex items-center">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 gap-4">
+        <div className="flex items-start sm:items-center">
           <Link
             href="/admin/blog"
-            className="mr-4 p-2 text-gray-600 hover:text-gray-900 transition-colors"
+            className="mr-3 sm:mr-4 p-2 text-gray-600 hover:text-gray-900 transition-colors flex-shrink-0"
           >
             <ArrowLeft size={20} />
           </Link>
-          <div>
+          <div className="min-w-0">
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Create New Post</h1>
-            <p className="text-gray-600 mt-1">Write and publish a new blog post</p>
+            <p className="text-sm sm:text-base text-gray-600 mt-1">Write and publish a new blog post</p>
           </div>
         </div>
 
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
           <button
             type="button"
             onClick={handlePreview}
-            className="inline-flex items-center px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+            className="flex-1 sm:flex-none inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors whitespace-nowrap"
           >
             <Eye size={16} className="mr-2" />
             Preview
@@ -137,10 +137,10 @@ export default function NewBlogPostPage() {
             form="blog-form"
             type="submit"
             disabled={saving || !formData.title}
-            className="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="flex-1 sm:flex-none inline-flex items-center justify-center px-4 py-2 bg-primary-900 text-white rounded-lg hover:bg-primary-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
           >
             <Save size={16} className="mr-2" />
-            {saving ? 'Saving...' : 'Save Post'}
+            <span>{saving ? 'Saving...' : 'Save Post'}</span>
           </button>
         </div>
       </div>

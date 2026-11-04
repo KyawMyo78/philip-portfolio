@@ -21,10 +21,11 @@ interface ContactMessage {
 // GET single contact message
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const contactId = params.id;
+    const { id } = await params;
+    const contactId = id;
     
     const portfolioRef = adminDb.collection('portfolio').doc('data');
     const doc = await portfolioRef.get();
@@ -63,10 +64,11 @@ export async function GET(
 // UPDATE contact message (for status updates like read, starred, archived, replied)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const contactId = params.id;
+    const { id } = await params;
+    const contactId = id;
     const updateData = await request.json();
 
     // Get current portfolio data
@@ -137,10 +139,11 @@ export async function PUT(
 // DELETE contact message
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const contactId = params.id;
+    const { id } = await params;
+    const contactId = id;
     
     // Get current portfolio data
     const portfolioRef = adminDb.collection('portfolio').doc('data');

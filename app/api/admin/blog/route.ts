@@ -32,13 +32,17 @@ export async function GET(req: Request) {
       .orderBy('createdAt', 'desc')
       .get();
 
-    const posts = snapshot.docs.map((doc: any) => ({
-      id: doc.id,
-      ...doc.data(),
-      publishedAt: doc.data().publishedAt?.toDate(),
-      createdAt: doc.data().createdAt?.toDate(),
-      updatedAt: doc.data().updatedAt?.toDate(),
-    }));
+    const posts = snapshot.docs.map((doc: any) => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        views: data.views || 0, // Ensure views is always a number
+        publishedAt: data.publishedAt?.toDate(),
+        createdAt: data.createdAt?.toDate(),
+        updatedAt: data.updatedAt?.toDate(),
+      };
+    });
 
     return NextResponse.json({ success: true, data: posts });
   } catch (error: any) {

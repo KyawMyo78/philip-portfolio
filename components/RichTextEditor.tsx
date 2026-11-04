@@ -1,15 +1,19 @@
 'use client'
 
 import dynamic from 'next/dynamic'
+import { useMemo } from 'react'
 
 // Dynamically import ReactQuill to avoid SSR issues
-const ReactQuill = dynamic(() => import('react-quill'), { 
-  ssr: false,
-  loading: () => <div className="h-64 bg-gray-100 animate-pulse rounded-lg"></div>
-})
+const ReactQuill = dynamic(
+  () => import('react-quill-new'),
+  { 
+    ssr: false,
+    loading: () => <div className="h-64 bg-gray-100 animate-pulse rounded-lg"></div>
+  }
+)
 
 // Import Quill styles
-import 'react-quill/dist/quill.snow.css'
+import 'react-quill-new/dist/quill.snow.css'
 
 interface RichTextEditorProps {
   value: string
@@ -26,7 +30,7 @@ export default function RichTextEditor({
 }: RichTextEditorProps) {
 
   // Custom toolbar configuration
-  const modules = {
+  const modules = useMemo(() => ({
     toolbar: [
       [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
       [{ 'font': [] }],
@@ -44,13 +48,13 @@ export default function RichTextEditor({
       // toggle to add extra line breaks when pasting HTML:
       matchVisual: false,
     }
-  }
+  }), [])
 
   const formats = [
     'header', 'font', 'size',
     'bold', 'italic', 'underline', 'strike', 'blockquote',
     'color', 'background',
-    'list', 'bullet', 'indent',
+    'list', 'indent',
     'align',
     'link', 'image', 'video',
     'code-block'

@@ -223,8 +223,9 @@ export default function ExperienceManagement() {
     const start = new Date(startDate);
     const end = endDate ? new Date(endDate) : new Date();
     
+    // Add 1 to include both start and end months in the calculation
     const months = (end.getFullYear() - start.getFullYear()) * 12 + 
-                   (end.getMonth() - start.getMonth());
+                   (end.getMonth() - start.getMonth()) + 1;
     
     const years = Math.floor(months / 12);
     const remainingMonths = months % 12;
@@ -272,23 +273,23 @@ export default function ExperienceManagement() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              className="bg-white rounded-xl shadow-lg border border-gray-100 p-4 sm:p-6"
+              className="bg-white rounded-xl shadow-lg border border-gray-100 p-6"
             >
-              <div className="flex justify-between items-start gap-3 mb-4">
+              <div className="flex justify-between items-start gap-4 mb-4">
                 <div className="flex-1 min-w-0">
-                  <div className="flex flex-wrap items-center gap-2 mb-2">
-                    <Briefcase className="text-primary-600" size={20} />
-                    <h3 className="text-lg sm:text-xl font-semibold text-gray-900 break-words">{experience.title}</h3>
+                  <div className="flex items-center gap-2 mb-2 flex-wrap">
+                    <Briefcase className="text-primary-600 flex-shrink-0" size={20} />
+                    <h3 className="text-xl font-semibold text-gray-900">{experience.title}</h3>
                     {experience.current && (
-                      <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded">
+                      <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded flex-shrink-0">
                         Current
                       </span>
                     )}
                   </div>
                   
-                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm sm:text-base text-gray-600 mb-2">
-                    <div className="flex items-center gap-1">
-                      <Building size={16} />
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-gray-600 mb-2 text-sm">
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      <Building size={16} className="flex-shrink-0" />
                       {experience.companyUrl ? (
                         <a 
                           href={experience.companyUrl}
@@ -297,41 +298,39 @@ export default function ExperienceManagement() {
                           className="text-primary-600 hover:text-primary-800 font-medium flex items-center gap-1"
                         >
                           {experience.company}
-                          <ExternalLink size={12} />
+                          <ExternalLink size={12} className="flex-shrink-0" />
                         </a>
                       ) : (
                         <span className="font-medium">{experience.company}</span>
                       )}
                     </div>
                     
-                    <div className="flex items-center gap-1">
-                      <MapPin size={16} />
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      <MapPin size={16} className="flex-shrink-0" />
                       <span>{experience.location}</span>
                     </div>
                     
-                    <div className="flex items-center gap-1">
-                      <Calendar size={16} />
-                      <span>
+                    <div className="flex items-center gap-1 flex-wrap">
+                      <Calendar size={16} className="flex-shrink-0" />
+                      <span className="whitespace-nowrap">
                         {formatDate(experience.startDate)} - {experience.current ? 'Present' : (experience.endDate ? formatDate(experience.endDate) : 'Present')}
                       </span>
-                      <span className="text-sm text-gray-500">
+                      <span className="text-sm text-gray-500 whitespace-nowrap">
                         ({calculateDuration(experience.startDate, experience.current ? undefined : experience.endDate)})
                       </span>
                     </div>
                   </div>
                 </div>
                 
-                <div className="flex shrink-0 gap-3">
+                <div className="flex gap-2 flex-shrink-0">
                   <button
                     onClick={() => openModal(experience)}
-                    aria-label="Edit"
                     className="text-primary-600 hover:text-primary-800"
                   >
                     <Edit3 size={16} />
                   </button>
                   <button
                     onClick={() => experience.id && handleDelete(experience.id)}
-                    aria-label="Delete"
                     className="text-red-600 hover:text-red-800"
                   >
                     <Trash2 size={16} />
@@ -473,7 +472,7 @@ export default function ExperienceManagement() {
                 </div>
 
                 {/* Company and Location */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Company *
@@ -509,14 +508,14 @@ export default function ExperienceManagement() {
                   <input
                     type="url"
                     value={editingExperience.companyUrl || ''}
-                    onChange={(e) => updateEditingExperience('companyUrl', e.target.value || undefined)}
+                    onChange={(e) => updateEditingExperience('companyUrl', e.target.value.trim() || '')}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                     placeholder="https://company.com"
                   />
                 </div>
 
                 {/* Dates */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Start Date *
@@ -537,7 +536,7 @@ export default function ExperienceManagement() {
                       <input
                         type="date"
                         value={editingExperience.endDate || ''}
-                        onChange={(e) => updateEditingExperience('endDate', e.target.value || undefined)}
+                        onChange={(e) => updateEditingExperience('endDate', e.target.value || '')}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                       />
                     </div>

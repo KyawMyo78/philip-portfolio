@@ -98,8 +98,8 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className="scroll-smooth">
-      <body className={inter.className}>
+    <html lang="en" className="scroll-smooth overflow-x-clip">
+      <body className={`${inter.className} overflow-x-clip`} suppressHydrationWarning>
         <ThemeProvider>
           {children}
         </ThemeProvider>

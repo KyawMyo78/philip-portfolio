@@ -567,7 +567,7 @@ export default function SkillsManagement() {
                     min="0"
                     max="20"
                     value={editingSkill.yearsOfExperience || ''}
-                    onChange={(e) => updateEditingSkill('yearsOfExperience', parseInt(e.target.value) || undefined)}
+                    onChange={(e) => updateEditingSkill('yearsOfExperience', e.target.value ? parseInt(e.target.value) : 0)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                     placeholder="e.g., 3"
                   />

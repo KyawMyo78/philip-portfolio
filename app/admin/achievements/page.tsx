@@ -18,6 +18,8 @@ import {
 import toast from 'react-hot-toast';
 import ConfirmDialog from '../../../components/ConfirmDialog';
 import FileUpload from '../../../components/FileUpload';
+import IconPickerModal from '../../../components/IconPickerModal';
+import IconPreview from '../../../components/IconPreview';
 
 interface Achievement {
   id?: string;
@@ -29,6 +31,7 @@ interface Achievement {
   credentialId?: string;
   credentialUrl?: string;
   image?: string;
+  icon?: string;
   featured: boolean;
   order: number;
 }
@@ -47,6 +50,8 @@ export default function AchievementsManagement() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAchievement, setEditingAchievement] = useState<Achievement | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [showCustomCategory, setShowCustomCategory] = useState(false);
+  const [customCategories, setCustomCategories] = useState<string[]>([]);
   
   // Confirmation dialog state
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -56,6 +61,14 @@ export default function AchievementsManagement() {
   useEffect(() => {
     loadAchievements();
   }, []);
+
+  useEffect(() => {
+    // Extract custom categories from existing achievements
+    const existingCategories = achievements.map(achievement => achievement.category);
+    const predefinedCategoryIds = categories.map(cat => cat.id);
+    const customCats = Array.from(new Set(existingCategories.filter(cat => !predefinedCategoryIds.includes(cat))));
+    setCustomCategories(customCats);
+  }, [achievements]);
 
   const loadAchievements = async () => {
     try {
@@ -78,15 +91,21 @@ export default function AchievementsManagement() {
   const openModal = (achievement?: Achievement) => {
     if (achievement) {
       setEditingAchievement(achievement);
+      // Check if the achievement has a custom category
+      const predefinedCategoryIds = categories.map(cat => cat.id);
+      const isCustomCategory = !predefinedCategoryIds.includes(achievement.category);
+      setShowCustomCategory(isCustomCategory);
     } else {
       setEditingAchievement({
         title: '',
         description: '',
         category: 'certification',
         date: new Date().toISOString().split('T')[0],
+        icon: 'award',
         featured: false,
         order: achievements.length
       });
+      setShowCustomCategory(false);
     }
     setIsModalOpen(true);
   };
@@ -94,6 +113,7 @@ export default function AchievementsManagement() {
   const closeModal = () => {
     setIsModalOpen(false);
     setEditingAchievement(null);
+    setShowCustomCategory(false);
   };
 
   const handleSave = async () => {
@@ -469,20 +489,61 @@ export default function AchievementsManagement() {
                 </div>
 
                 {/* Category and Date */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Category
                     </label>
-                    <select
-                      value={editingAchievement.category}
-                      onChange={(e) => updateEditingAchievement('category', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                    >
-                      {categories.map(cat => (
-                        <option key={cat.id} value={cat.id}>{cat.name}</option>
-                      ))}
-                    </select>
+                    <div className="space-y-2">
+                      {!showCustomCategory ? (
+                        <div className="space-y-2">
+                          <select
+                            value={editingAchievement.category}
+                            onChange={(e) => {
+                              if (e.target.value === 'custom') {
+                                setShowCustomCategory(true);
+                                updateEditingAchievement('category', '');
+                              } else {
+                                updateEditingAchievement('category', e.target.value);
+                              }
+                            }}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                          >
+                            <option value="">Select a category</option>
+                            {/* Predefined categories */}
+                            {categories.map(cat => (
+                              <option key={cat.id} value={cat.id}>{cat.name}</option>
+                            ))}
+                            {/* Custom categories */}
+                            {customCategories.map(cat => (
+                              <option key={cat} value={cat}>{cat}</option>
+                            ))}
+                            <option value="custom">+ Add New Category</option>
+                          </select>
+                        </div>
+                      ) : (
+                        <div className="flex space-x-2">
+                          <input
+                            type="text"
+                            value={editingAchievement.category}
+                            onChange={(e) => updateEditingAchievement('category', e.target.value)}
+                            placeholder="Enter custom category name"
+                            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShowCustomCategory(false);
+                              updateEditingAchievement('category', 'certification');
+                            }}
+                            className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                            title="Use predefined categories"
+                          >
+                            <X size={16} />
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   <div>
@@ -498,6 +559,22 @@ export default function AchievementsManagement() {
                   </div>
                 </div>
 
+                {/* Icon Picker */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Achievement Icon
+                  </label>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 flex items-center justify-center bg-gray-100 rounded">
+                      <IconPreview name={editingAchievement.icon || 'award'} className="w-6 h-6 text-gray-700" />
+                    </div>
+                    <IconPickerModal 
+                      value={editingAchievement.icon || 'award'} 
+                      onChange={(key: string) => updateEditingAchievement('icon', key)} 
+                    />
+                  </div>
+                </div>
+
                 {/* Issuer */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -506,14 +583,14 @@ export default function AchievementsManagement() {
                   <input
                     type="text"
                     value={editingAchievement.issuer || ''}
-                    onChange={(e) => updateEditingAchievement('issuer', e.target.value || undefined)}
+                    onChange={(e) => updateEditingAchievement('issuer', e.target.value.trim() || '')}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                     placeholder="Who issued this achievement?"
                   />
                 </div>
 
                 {/* Credential Details */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Credential ID
@@ -521,7 +598,7 @@ export default function AchievementsManagement() {
                     <input
                       type="text"
                       value={editingAchievement.credentialId || ''}
-                      onChange={(e) => updateEditingAchievement('credentialId', e.target.value || undefined)}
+                      onChange={(e) => updateEditingAchievement('credentialId', e.target.value.trim() || '')}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                       placeholder="Certificate/License number"
                     />
@@ -534,7 +611,7 @@ export default function AchievementsManagement() {
                     <input
                       type="url"
                       value={editingAchievement.credentialUrl || ''}
-                      onChange={(e) => updateEditingAchievement('credentialUrl', e.target.value || undefined)}
+                      onChange={(e) => updateEditingAchievement('credentialUrl', e.target.value.trim() || '')}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                       placeholder="https://verify.example.com"
                     />

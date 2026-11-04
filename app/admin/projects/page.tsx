@@ -10,7 +10,8 @@ import {
   X, 
   Upload, 
   ExternalLink, 
-  Github,
+  Link,
+  Download,
   Calendar,
   Tag,
   Image as ImageIcon
@@ -395,17 +396,17 @@ export default function ProjectsManagement() {
                 {/* Actions */}
                 <div className="flex justify-between items-center">
                   <div className="flex gap-2">
-                    {project.githubUrl && (
+                    {project.githubUrl?.trim() && (
                       <a
                         href={project.githubUrl}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-gray-500 hover:text-gray-700"
                       >
-                        <Github size={16} />
+                        <Link size={16} />
                       </a>
                     )}
-                    {project.liveUrl && (
+                    {project.liveUrl?.trim() && (
                       <a
                         href={project.liveUrl}
                         target="_blank"
@@ -413,6 +414,16 @@ export default function ProjectsManagement() {
                         className="text-gray-500 hover:text-gray-700"
                       >
                         <ExternalLink size={16} />
+                      </a>
+                    )}
+                    {project.downloadUrl?.trim() && (
+                      <a
+                        href={project.downloadUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-gray-500 hover:text-gray-700"
+                      >
+                        <Download size={16} />
                       </a>
                     )}
                   </div>
@@ -547,7 +558,7 @@ export default function ProjectsManagement() {
                 </div>
 
                 {/* Category and Status */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Category
@@ -621,7 +632,7 @@ export default function ProjectsManagement() {
                 </div>
 
                 {/* Dates */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Start Date
@@ -641,7 +652,7 @@ export default function ProjectsManagement() {
                     <input
                       type="date"
                       value={editingProject.endDate || ''}
-                      onChange={(e) => updateEditingProject('endDate', e.target.value || undefined)}
+                      onChange={(e) => updateEditingProject('endDate', e.target.value || '')}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                     />
                   </div>
@@ -656,7 +667,7 @@ export default function ProjectsManagement() {
                     <input
                       type="url"
                       value={editingProject.githubUrl || ''}
-                      onChange={(e) => updateEditingProject('githubUrl', e.target.value || undefined)}
+                      onChange={(e) => updateEditingProject('githubUrl', e.target.value.trim() || '')}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                       placeholder="Enter project website or related link"
                     />
@@ -669,7 +680,7 @@ export default function ProjectsManagement() {
                     <input
                       type="url"
                       value={editingProject.liveUrl || ''}
-                      onChange={(e) => updateEditingProject('liveUrl', e.target.value || undefined)}
+                      onChange={(e) => updateEditingProject('liveUrl', e.target.value.trim() || '')}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                       placeholder="Enter live website or demo link"
                     />
@@ -682,7 +693,7 @@ export default function ProjectsManagement() {
                     <input
                       type="url"
                       value={editingProject.downloadUrl || ''}
-                      onChange={(e) => updateEditingProject('downloadUrl', e.target.value || undefined)}
+                      onChange={(e) => updateEditingProject('downloadUrl', e.target.value.trim() || '')}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                       placeholder="Enter download or app store link"
                     />

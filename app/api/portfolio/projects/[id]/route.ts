@@ -5,10 +5,11 @@ import { callRevalidate } from '@/lib/revalidate';
 // GET single project
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const doc = await adminDb.collection('projects').doc(params.id).get();
+    const { id } = await params;
+    const doc = await adminDb.collection('projects').doc(id).get();
 
     if (!doc.exists) {
       return NextResponse.json(
@@ -34,9 +35,10 @@ export async function GET(
 // PUT update project
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const projectData = await request.json();
 
     // Add update timestamp
@@ -45,7 +47,7 @@ export async function PUT(
       updatedAt: new Date().toISOString()
     };
 
-    await adminDb.collection('projects').doc(params.id).update(updatedProject);
+    await adminDb.collection('projects').doc(id).update(updatedProject);
 
     return NextResponse.json({
       success: true,
@@ -67,10 +69,11 @@ export async function PUT(
 // DELETE project
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await adminDb.collection('projects').doc(params.id).delete();
+    const { id } = await params;
+    await adminDb.collection('projects').doc(id).delete();
 
     return NextResponse.json({
       success: true,
