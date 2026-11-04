@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { NextRequest, NextResponse } from 'next/server';
+import { bearerToken, isClaudeKey, claudeKeyAllows } from './claude-key';
 
 export interface AdminSession {
   email: string;
@@ -12,6 +13,14 @@ export function getJwtSecret(): string | undefined {
 }
 
 export function requireAdmin(request: NextRequest): AdminSession | NextResponse {
+  // Claude's API key, limited to the same scope the middleware enforces
+  const key = bearerToken(request);
+  if (key) {
+    return isClaudeKey(key) && claudeKeyAllows(request.nextUrl.pathname, request.method)
+      ? { email: 'claude-api-key', role: 'admin' }
+      : NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+  }
+
   const token = request.cookies.get('admin-token')?.value;
   const secret = getJwtSecret();
 

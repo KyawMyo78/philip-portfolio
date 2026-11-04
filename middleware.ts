@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAdminToken } from './lib/admin-token';
+import { bearerToken, isClaudeKey, claudeKeyAllows } from './lib/claude-key';
 
 // API calls anyone may make (the public site, the contact form, login and password reset).
 // Everything else under /api needs a valid admin session.
@@ -12,6 +13,8 @@ const PUBLIC_API: [string, RegExp][] = [
   ['POST', /^\/api\/auth(\/(forgot-password|reset-password|verify-reset-token))?$/],
   ['DELETE', /^\/api\/auth$/], // logout
   ['POST', /^\/api\/revalidate$/], // protected by its own REVALIDATE_SECRET
+  ['POST', /^\/api\/mcp$/], // Claude connector; checks CLAUDE_API_KEY itself
+  ['GET', /^\/api\/mcp$/],
 ];
 const PUBLIC_ADMIN_PAGES = ['/admin/login', '/admin/forgot-password', '/admin/reset-password'];
 
@@ -21,6 +24,14 @@ export async function middleware(request: NextRequest) {
 
   if (pathname.startsWith('/api/')) {
     if (method === 'OPTIONS' || PUBLIC_API.some(([m, re]) => m === method && re.test(pathname))) return NextResponse.next();
+    // Claude's API key: content editing and reading messages only, never login or credentials
+    const key = bearerToken(request);
+    if (key) {
+      if (!isClaudeKey(key)) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+      if (!claudeKeyAllows(pathname, method)) return NextResponse.json({ success: false, error: 'Not allowed with the Claude API key' }, { status: 403 });
+      console.log(`[claude-key] ${method} ${pathname}`); // shows in Vercel logs
+      return NextResponse.next();
+    }
     const ok = await verifyAdminToken(request.cookies.get('admin-token')?.value, process.env.NEXTAUTH_SECRET);
     return ok ? NextResponse.next() : NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
   }

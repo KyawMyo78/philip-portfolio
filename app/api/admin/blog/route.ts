@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { adminDb } from '@/lib/firebase-admin'
 import { verifyAdminToken } from '@/lib/admin-token'
+import { bearerToken, isClaudeKey, claudeKeyAllows } from '@/lib/claude-key'
 
 
 // shared, build-safe Firebase setup (lib/firebase-admin.ts)
@@ -8,6 +9,8 @@ const db = adminDb;
 
 // Admin session check (the middleware also enforces this; kept here as a second lock)
 async function isAuthorized(req: Request) {
+  const key = bearerToken(req);
+  if (key) return isClaudeKey(key) && claudeKeyAllows(new URL(req.url).pathname, req.method);
   const token = req.headers.get('cookie')?.match(/(?:^|;\s*)admin-token=([^;]+)/)?.[1];
   return verifyAdminToken(token, process.env.NEXTAUTH_SECRET);
 }
