@@ -1,4 +1,4 @@
-# Calla Portfolio
+# Portfolio Website
 
 A modern, fully-featured portfolio website with an intelligent AI assistant. Built with Next.js 14, TypeScript, Tailwind CSS, Firebase, and powered by Google's Gemini AI.
 
@@ -10,12 +10,6 @@ A modern, fully-featured portfolio website with an intelligent AI assistant. Bui
 - Primary color: `#1c332f`, Secondary: `#e0d39f`, Text: `#ffffff`
 - Smooth animations and modern UI components
 
-### 🤖 **AI Assistant (AP's Clover)**
-- Intelligent AI assistant powered by Google Gemini
-- Floating AI button accessible from all admin pages
-- Personalized responses based on your portfolio data
-- Chat history and conversation memory
-- Markdown-rendered responses with modern chat interface
 
 ### 🔧 **Comprehensive Admin Panel**
 - Secure authentication with password reset functionality
@@ -344,5 +338,5 @@ For questions or issues:
 
 <div align="center">
   <p>Built with ❤️ by <a href="https://github.com/KyawMyo78">Kyaw Myo</a></p>
-  <p>© 2024 Calla Portfolio. All rights reserved.</p>
+  <p>© 2025 Portfolio. All rights reserved.</p>
 </div>

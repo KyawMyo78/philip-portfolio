@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
 import bcrypt from 'bcryptjs';
+import { enforceRateLimit } from '@/lib/rate-limiter';
 
 export async function POST(request: NextRequest) {
+  const rateLimitResponse = enforceRateLimit(request, 'password-reset-confirm', { limit: 5, windowMs: 60 * 60 * 1000 });
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const { token, email, password } = await request.json();
 
@@ -33,17 +37,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if any token matches and is not expired
-    let validTokenDoc = null;
-    snapshot.forEach((doc: any) => {
+    // Check if any token matches and is not expired.
+    const validTokenDoc = snapshot.docs.find((doc: any) => {
       const data = doc.data();
-      const expiresAt = new Date(data.expiresAt);
-      if (expiresAt > new Date()) {
-        validTokenDoc = doc;
-      }
+      return new Date(data.expiresAt) > new Date();
     });
 
     if (!validTokenDoc) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid or expired reset token' },
+        { status: 400 }
+      );
+    }
+
+    const resetEmail = validTokenDoc.id;
+    if (email.trim().toLowerCase() !== resetEmail.toLowerCase()) {
       return NextResponse.json(
         { success: false, error: 'Invalid or expired reset token' },
         { status: 400 }
@@ -57,7 +65,7 @@ export async function POST(request: NextRequest) {
     // Update the password hash in Firebase
     try {
       await adminDb.collection('admin-settings').doc('credentials').set({
-        email: email,
+        email: resetEmail,
         passwordHash: hashedPassword,
         updatedAt: new Date().toISOString(),
       }, { merge: true });
@@ -81,7 +89,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ 
       success: true, 
       message: 'Password reset successful',
-      newHash: hashedPassword // Return the hash for manual env update
     });
 
   } catch (error) {

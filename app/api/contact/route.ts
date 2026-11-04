@@ -1,24 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
+import { enforceRateLimit } from '@/lib/rate-limiter';
 
 export async function POST(request: NextRequest) {
+  const rateLimitResponse = enforceRateLimit(request, 'contact', { limit: 5, windowMs: 15 * 60 * 1000 });
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const { name, email, subject, message } = await request.json();
 
-    // Validate input
-    if (!name || !email || !subject || !message) {
+    const validEmail = typeof email === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    const validFields = typeof name === 'string' && name.trim().length <= 100 &&
+      typeof subject === 'string' && subject.trim().length <= 200 &&
+      typeof message === 'string' && message.trim().length <= 5000;
+    if (!validEmail || !validFields) {
       return NextResponse.json(
-        { success: false, error: 'All fields are required' },
+        { success: false, error: 'Please provide valid contact details.' },
         { status: 400 }
       );
     }
 
     // Save to Firestore
     const contactData = {
-      name,
-      email,
-      subject,
-      message,
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
+      subject: subject.trim(),
+      message: message.trim(),
       status: 'new',
       createdAt: new Date().toISOString(),
     };

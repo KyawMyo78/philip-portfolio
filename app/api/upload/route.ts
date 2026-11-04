@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { getStorage } from 'firebase-admin/storage';
+import { randomUUID } from 'crypto';
+import { isUnauthorized, requireAdmin } from '@/lib/admin-auth';
+import { enforceRateLimit } from '@/lib/rate-limiter';
 
 // Initialize Firebase Admin SDK
 if (!getApps().length) {
@@ -20,6 +23,11 @@ if (!getApps().length) {
 const storage = getStorage();
 
 export async function POST(request: NextRequest) {
+  const session = requireAdmin(request);
+  if (isUnauthorized(session)) return session;
+  const rateLimitResponse = enforceRateLimit(request, 'upload', { limit: 30, windowMs: 15 * 60 * 1000 });
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const bucketName = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET;
     const data = await request.formData();
@@ -123,6 +131,7 @@ export async function POST(request: NextRequest) {
     }
     
     const fileRef = bucket.file(`${storagePath}/${finalFileName}`);
+    const downloadToken = randomUUID();
     
     // Upload the file
     await fileRef.save(buffer, {
@@ -132,21 +141,22 @@ export async function POST(request: NextRequest) {
           uploadType: uploadType,
           originalName: file.name,
           uploadedAt: new Date().toISOString(),
+          // Firebase's download endpoint uses this token while the bucket stays private.
+          firebaseStorageDownloadTokens: downloadToken,
         }
       }
     });
 
-    // Make the file publicly accessible
-    await fileRef.makePublic();
-
-    // Get the public URL
+    // Generate a Firebase download URL. Unlike a raw GCS URL, this does not
+    // require public bucket/object access and works with Firebase Storage rules.
     const actualBucketName = bucket.name;
-    const publicUrl = `https://storage.googleapis.com/${actualBucketName}/${storagePath}/${finalFileName}`;
+    const encodedPath = encodeURIComponent(`${storagePath}/${finalFileName}`);
+    const downloadUrl = `https://firebasestorage.googleapis.com/v0/b/${actualBucketName}/o/${encodedPath}?alt=media&token=${downloadToken}`;
 
     return NextResponse.json({ 
       success: true, 
       message: 'File uploaded successfully',
-      url: publicUrl,
+      url: downloadUrl,
       fileName: finalFileName,
       storagePath: `${storagePath}/${finalFileName}`
     });
